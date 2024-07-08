@@ -41,3 +41,24 @@ func TestPodsServerImpl_GetPods(t *testing.T) {
 	}
 	t.Log(pl)
 }
+
+func TestPodsServerImpl_GetNamespaceList(t *testing.T) {
+	nl := pods.NewNamespaceList()
+	nl, err := podsSvc.GetNamespaceList(ctx)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(nl)
+}
+
+func TestPodsServerImpl_GetPodsListUnderNamespaceWithKeyword(t *testing.T) {
+	podsList := pods.NewPodsItemsList()
+	ns := "kube-system"
+	podsList, err := podsSvc.GetPodsListUnderNamespaceWithKeyword(ctx, ns, "")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(podsList)
+}
