@@ -29,6 +29,7 @@ func (p *PodsApiHandler) Name() string {
 func (p *PodsApiHandler) Registry(router gin.IRouter) {
 	v1 := router.Group("pods")
 	v1.GET("", p.GetPods)
+	v1.GET("/namespacelist", p.GetNamespaceList)
 }
 
 // @Summary      get the pods list
@@ -48,4 +49,24 @@ func (p *PodsApiHandler) GetPods(c *gin.Context) {
 		return
 	}
 	response.Success(c, "get the pods list", podsList)
+}
+
+// @Summary      get the namespace list
+// @Description  get the namespace list
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods/namespacelist [get]
+func (p *PodsApiHandler) GetNamespaceList(c *gin.Context) {
+	namespaceList, err := p.svc.GetNamespaceList(c.Request.Context())
+
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+
+	response.Success(c, "get the namespace list", namespaceList)
 }

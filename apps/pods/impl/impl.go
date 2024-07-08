@@ -32,6 +32,24 @@ func (s *PodsServerImpl) GetPods(ctx context.Context) (*pods.Pods, error) {
 	return podsList, nil
 
 }
+
+func (s *PodsServerImpl) GetNamespaceList(ctx context.Context) (*pods.NamespaceList, error) {
+	namespaceList := pods.NewNamespaceList()
+	c := context.TODO()
+	list, err := global.KubeConfigSet.CoreV1().Namespaces().List(c, metav1.ListOptions{})
+
+	if err != nil {
+		return nil, err
+	}
+	for _, namespace := range list.Items {
+		namespaceList.Items = append(namespaceList.Items, &pods.Namespace{
+			Name:              namespace.Name,
+			CreationTimestamp: namespace.CreationTimestamp.Unix(),
+			Status:            string(namespace.Status.Phase),
+		})
+	}
+	return namespaceList, nil
+}
 func (s *PodsServerImpl) Init() error {
 	return nil
 }

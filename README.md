@@ -3,6 +3,15 @@
 
 this is a web app for managing k8s resources
 
+
+
+## Pods Management
+- get namespace list 
+- Pod create
+- Pod info
+- Pod edit
+- Pod delete
+
 ## push to /pull from harbor
 
 ```docker
