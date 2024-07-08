@@ -5,10 +5,9 @@ import (
 	"fmt"
 	docs "github.com/IanZC0der/kubecenter/docs"
 	"github.com/IanZC0der/kubecenter/global"
-	"github.com/gin-contrib/cors"
+	"github.com/IanZC0der/kubecenter/middlewares"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
 	"net/http"
 
 	"github.com/IanZC0der/kubecenter/ioc"
@@ -17,13 +16,13 @@ import (
 
 func NewHttpServer() *HttpServer {
 	r := gin.Default()
-	r.Use(cors.Default())
+	//r.Use(cors.Default())
+	r.Use(middlewares.Cors)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	docs.SwaggerInfo.Host = global.APP().HttpAddress()
+	//docs.SwaggerInfo.Host = global.APP().HttpAddress()
 	docs.SwaggerInfo.BasePath = "/api/kubecenter/v1"
 
-	//r.Use(middlewares.Cors)
 	ioc.DefaultApiHandlerContainer().RouterRegistry(r.Group("/api/kubecenter/v1"))
 	return &HttpServer{
 		sver: &http.Server{
