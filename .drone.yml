@@ -1,0 +1,44 @@
+kind: pipeline
+type: docker
+name: kubecenter-publish
+steps:
+  - name: build
+    image: plugins/docker
+    volumes:
+      - name: hosts
+        path: /etc/hosts
+      - name: docker-ca
+        path: /etc/docker
+      - name: dockersock
+        path: /var/run/docker.sock
+    settings:
+      username: admin
+      password:
+        from_secret: harbor_password
+      repo: harbor.kubecenter.com/kubecenter/kubecenter
+      registry: harbor.kubecenter.com
+      tags:
+        - v1.2
+  - name: ssh commands
+    image: appleboy/drone-ssh
+    settings:
+      host: 23.251.33.66
+      username: root
+      password:
+        from_secret: ssh_password
+      port: 22
+      script:
+        #拉取镜像并重启
+        - if [ $(docker ps -a | grep kubecenter-server | wc -l) -ge 1 ];then docker stop kubecenter-server && docker rm kubecenter-server; fi
+        - docker pull harbor.kubecenter.com/kubecenter/kubecenter:v1.2
+        - docker run --name kubecenter-server --restart=always -d -p7080:7080 harbor.kubecenter.com/kubecenter/kubecenter:v1.2
+volumes:
+  - name: hosts
+    host:
+      path: /etc/hosts
+  - name: docker-ca
+    host:
+      path: /etc/docker
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
