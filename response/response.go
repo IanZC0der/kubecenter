@@ -6,9 +6,13 @@ import (
 	"net/http"
 )
 
-func Success(c *gin.Context, data any) {
+func Success(c *gin.Context, msg string, data any) {
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
+		"msg":  "success",
+		"data": data,
+	})
 
 }
 
@@ -22,6 +26,10 @@ func Failed(c *gin.Context, err error) {
 		e.HttpCode = http.StatusInternalServerError
 	}
 
-	c.JSON(e.HttpCode, e)
+	c.JSON(e.HttpCode, gin.H{
+		"code": e.HttpCode,
+		"msg":  "failed",
+		"data": e,
+	})
 
 }
