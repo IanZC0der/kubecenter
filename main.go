@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/IanZC0der/kubecenter/apps"
 	"github.com/IanZC0der/kubecenter/initialize"
 	"github.com/IanZC0der/kubecenter/protocol"
 	"os"
@@ -14,7 +15,7 @@ func main() {
 		return
 	}
 	initialize.K8S()
-
+	initialize.IOCInit()
 	httpServer := protocol.NewHttpServer()
 
 	if err := httpServer.Run(); err != nil {
