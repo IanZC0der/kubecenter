@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/IanZC0der/kubecenter/apps/pods"
+	_ "github.com/IanZC0der/kubecenter/docs"
 	"github.com/IanZC0der/kubecenter/ioc"
 	"github.com/IanZC0der/kubecenter/response"
 	"github.com/gin-gonic/gin"
@@ -26,10 +27,19 @@ func (p *PodsApiHandler) Name() string {
 	return pods.AppName
 }
 func (p *PodsApiHandler) Registry(router gin.IRouter) {
-	v1 := router.Group("v1").Group("pods")
-	v1.GET("/", p.GetPods)
+	v1 := router.Group("pods")
+	v1.GET("", p.GetPods)
 }
 
+// @Summary      get the pods list
+// @Description  get the pods list and name spaces
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods [get]
 func (p *PodsApiHandler) GetPods(c *gin.Context) {
 	podsList, err := p.svc.GetPods(c.Request.Context())
 

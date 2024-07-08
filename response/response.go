@@ -6,12 +6,18 @@ import (
 	"net/http"
 )
 
+type Response struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
+}
+
 func Success(c *gin.Context, msg string, data any) {
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"msg":  "success",
-		"data": data,
+	c.JSON(http.StatusOK, &Response{
+		Code: http.StatusOK,
+		Msg:  "success",
+		Data: data,
 	})
 
 }
@@ -26,10 +32,10 @@ func Failed(c *gin.Context, err error) {
 		e.HttpCode = http.StatusInternalServerError
 	}
 
-	c.JSON(e.HttpCode, gin.H{
-		"code": e.HttpCode,
-		"msg":  "failed",
-		"data": e,
+	c.JSON(e.HttpCode, &Response{
+		Code: e.HttpCode,
+		Msg:  "failed",
+		Data: e,
 	})
 
 }
