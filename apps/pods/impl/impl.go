@@ -5,6 +5,8 @@ import (
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	//"k8s.io/kube-openapi/pkg/util"
+	"strings"
 
 	"github.com/IanZC0der/kubecenter/apps/pods"
 )
@@ -49,6 +51,22 @@ func (s *PodsServerImpl) GetNamespaceList(ctx context.Context) (*pods.NamespaceL
 		})
 	}
 	return namespaceList, nil
+}
+
+func (s *PodsServerImpl) GetPodsListUnderNamespaceWithKeyword(ctx context.Context, namespace string, keyword string) (*pods.PodsList, error) {
+	podsList := pods.NewPodsItemsList()
+
+	c := context.TODO()
+	list, err := global.KubeConfigSet.CoreV1().Pods(namespace).List(c, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range list.Items {
+		if strings.Contains(item.Name, keyword) {
+			podsList.Items = append(podsList.Items, pods.GetPodListItemFromPod(&item))
+		}
+	}
+	return podsList, nil
 }
 func (s *PodsServerImpl) Init() error {
 	return nil

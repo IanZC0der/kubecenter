@@ -38,6 +38,39 @@ paths:
       summary: get the pods list
       tags:
       - pods
+  /pods/{namespace}:
+    get:
+      consumes:
+      - application/json
+      description: get the pods list given a namespace, with optional keyword
+      parameters:
+      - description: Namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Filter pods by keyword
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get the pods list under a namespace
+      tags:
+      - pods
   /pods/namespacelist:
     get:
       consumes:

@@ -30,6 +30,7 @@ func (p *PodsApiHandler) Registry(router gin.IRouter) {
 	v1 := router.Group("pods")
 	v1.GET("", p.GetPods)
 	v1.GET("/namespacelist", p.GetNamespaceList)
+	v1.GET("/:namespace", p.GetPodsListUnderNamespace)
 }
 
 // @Summary      get the pods list
@@ -62,11 +63,34 @@ func (p *PodsApiHandler) GetPods(c *gin.Context) {
 // @Router       /pods/namespacelist [get]
 func (p *PodsApiHandler) GetNamespaceList(c *gin.Context) {
 	namespaceList, err := p.svc.GetNamespaceList(c.Request.Context())
-
 	if err != nil {
 		response.Failed(c, err)
 		return
 	}
 
 	response.Success(c, "get the namespace list", namespaceList)
+}
+
+// @Summary      get the pods list under a namespace
+// @Description	 get the pods list given a namespace, with optional keyword
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Param namespace path string true "Namespace"
+// @Param keyword query string false "Filter pods by keyword"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods/{namespace} [get]
+func (p *PodsApiHandler) GetPodsListUnderNamespace(c *gin.Context) {
+	namespace := c.Param("namespace")
+	keyword := c.Query("keyword")
+
+	podsList, err := p.svc.GetPodsListUnderNamespaceWithKeyword(c.Request.Context(), namespace, keyword)
+
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get the pods list", podsList)
 }
