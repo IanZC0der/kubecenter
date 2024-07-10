@@ -31,6 +31,10 @@ func (p *PodsApiHandler) Registry(router gin.IRouter) {
 	v1.GET("", p.GetPods)
 	v1.GET("/namespacelist", p.GetNamespaceList)
 	v1.GET("/:namespace", p.GetPodsListUnderNamespace)
+	v1.GET("/poddetail/:namespace", p.GetPodDetail)
+	v1.POST("", p.CreatePods)
+	v1.PUT("", p.UpdatePod)
+	v1.DELETE("", p.DeletePod)
 }
 
 // @Summary      get the pods list
@@ -93,4 +97,120 @@ func (p *PodsApiHandler) GetPodsListUnderNamespace(c *gin.Context) {
 		return
 	}
 	response.Success(c, "get the pods list", podsList)
+}
+
+// @Summary      get a pod detail
+// @Description	 get a pod detail under a namespace
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Param namespace path string true "Namespace"
+// @Param keyword query string true "The name of the pod"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods/poddetail/{namespace} [get]
+func (p *PodsApiHandler) GetPodDetail(c *gin.Context) {
+	namespace := c.Param("namespace")
+	name := c.Query("name")
+	podDetail, err := p.svc.GetPodDetail(c.Request.Context(), namespace, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get the pod detail success", podDetail)
+}
+
+// @Summary create a Kubernetes pod
+//
+// @Description
+// @Description.markdown podexample
+// @Tags pods
+// @Accept json
+// @Produce json
+//
+// @Param pod body object true "Pod Configuration"
+//
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure      500  {object}  response.Response
+// @Router /pods [post]
+func (p *PodsApiHandler) CreatePods(c *gin.Context) {
+	newPod := pods.NewPod()
+	if err := c.ShouldBind(newPod); err != nil {
+		response.Failed(c, err)
+		return
+	}
+
+	err := pods.PodCreateValidate(newPod)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	//k8sPod := pods.CreatePodFromPodRequest(newPod)
+	k8sPod, err := p.svc.CreatePod(c.Request.Context(), newPod)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+
+	response.Success(c, "create pod success", k8sPod)
+}
+
+// @Summary update a Kubernetes pod
+//
+// @Description.markdown updatepod
+// @Tags pods
+// @Accept json
+// @Produce json
+//
+// @Param pod body object true "Pod Configuration"
+//
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure      500  {object}  response.Response
+// @Router /pods [put]
+func (p *PodsApiHandler) UpdatePod(c *gin.Context) {
+	newPod := pods.NewPod()
+	if err := c.ShouldBind(newPod); err != nil {
+		response.Failed(c, err)
+		return
+	}
+
+	err := pods.PodCreateValidate(newPod)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+
+	k8sPod, msg, err := p.svc.UpdatePod(c.Request.Context(), newPod)
+	if err != nil {
+		response.FailedWithMsg(c, msg, err)
+		return
+	}
+
+	response.Success(c, msg, k8sPod)
+
+}
+
+// @Summary      delete a pod
+// @Description	 delete a pod based on namespace and name
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Param namespace query string true "Namespace"
+// @Param name query string true "The name of the pod"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods [delete]
+func (p *PodsApiHandler) DeletePod(c *gin.Context) {
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+	k8sPod, msg, err := p.svc.DeletePod(c.Request.Context(), namespace, name)
+	if err != nil {
+		response.FailedWithMsg(c, msg, err)
+		return
+	}
+	response.Success(c, "delete pod success", k8sPod)
 }

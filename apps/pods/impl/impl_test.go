@@ -62,3 +62,25 @@ func TestPodsServerImpl_GetPodsListUnderNamespaceWithKeyword(t *testing.T) {
 	}
 	t.Log(podsList)
 }
+
+func TestPodsServerImpl_GetPodDetail(t *testing.T) {
+	newPod := pods.NewPod()
+	ns := "kube-system"
+	name := "kube-apiserver-ubuntu-s-2vcpu-4gb-sfo3-01"
+
+	newPod, err := podsSvc.GetPodDetail(ctx, ns, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(newPod)
+}
+
+func TestPodsServerImpl_DeletePod(t *testing.T) {
+	ns := "test"
+	name := "test3"
+	deletedPod, _, err := podsSvc.DeletePod(ctx, ns, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(deletedPod)
+}

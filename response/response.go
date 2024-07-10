@@ -16,7 +16,7 @@ func Success(c *gin.Context, msg string, data any) {
 
 	c.JSON(http.StatusOK, &Response{
 		Code: http.StatusOK,
-		Msg:  "success",
+		Msg:  msg,
 		Data: data,
 	})
 
@@ -35,6 +35,24 @@ func Failed(c *gin.Context, err error) {
 	c.JSON(e.HttpCode, &Response{
 		Code: e.HttpCode,
 		Msg:  "failed",
+		Data: e,
+	})
+
+}
+
+func FailedWithMsg(c *gin.Context, msg string, err error) {
+	defer c.Abort()
+	var e *exception.ApiException
+	if v, ok := err.(*exception.ApiException); ok {
+		e = v
+	} else {
+		e = exception.New(http.StatusInternalServerError, err.Error())
+		e.HttpCode = http.StatusInternalServerError
+	}
+
+	c.JSON(e.HttpCode, &Response{
+		Code: e.HttpCode,
+		Msg:  msg,
 		Data: e,
 	})
 
