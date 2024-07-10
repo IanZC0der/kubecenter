@@ -43,6 +43,143 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "updates a Kubernetes pod with detailed configurations, the old pod (if exists) will be deleted, an example of pod config:\n\n```json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\": \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "update a Kubernetes pod",
+                "parameters": [
+                    {
+                        "description": "Pod Configuration",
+                        "name": "pod",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "creates a new Kubernetes pod with detailed configurations, an example of pod config:\n\n```json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\": \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "create a Kubernetes pod",
+                "parameters": [
+                    {
+                        "description": "Pod Configuration",
+                        "name": "pod",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete a pod based on namespace and name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "delete a pod",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The name of the pod",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
             }
         },
         "/pods/namespacelist": {
@@ -58,6 +195,57 @@
                     "pods"
                 ],
                 "summary": "get the namespace list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pods/poddetail/{namespace}": {
+            "get": {
+                "description": "get a pod detail under a namespace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "get a pod detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The name of the pod",
+                        "name": "keyword",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -46,10 +46,17 @@ func (lI *ListItem) String() string {
 }
 
 type Base struct {
-	Name          string      `json:"name"`
-	Labels        []*ListItem `json:"labels"`
-	Namespace     string      `json:"namespace"`
-	RestartPolicy string      `json:"restartPolicy"`
+	Name      string      `json:"name"`
+	Labels    []*ListItem `json:"labels"`
+	Namespace string      `json:"namespace"`
+	//always || never || on failure
+	RestartPolicy string `json:"restartPolicy"`
+}
+
+func NewBase() *Base {
+	return &Base{
+		Labels: make([]*ListItem, 0),
+	}
 }
 
 type Volume struct {
@@ -61,12 +68,25 @@ type DnsConfig struct {
 	Nameservers []string `json:"nameservers"`
 }
 
+func NewDnsConfig() *DnsConfig {
+	return &DnsConfig{
+		Nameservers: make([]string, 0),
+	}
+}
+
 type NetWorking struct {
 	HostNetwork bool        `json:"hostNetwork"`
 	HostName    string      `json:"hostName"`
 	DnsPolicy   string      `json:"dnsPolicy"`
-	DnsConfig   DnsConfig   `json:"dnsConfig"`
+	DnsConfig   *DnsConfig  `json:"dnsConfig"`
 	HostAliases []*ListItem `json:"hostAliases"`
+}
+
+func NewNetWorking() *NetWorking {
+	return &NetWorking{
+		HostAliases: make([]*ListItem, 0),
+		DnsConfig:   NewDnsConfig(),
+	}
 }
 
 type Resources struct {
@@ -75,6 +95,10 @@ type Resources struct {
 	MemLimit   int32 `json:"memLimit"`
 	CpuRequest int32 `json:"cpuRequest"`
 	CpuLimit   int32 `json:"cpuLimit"`
+}
+
+func NewResources() *Resources {
+	return &Resources{}
 }
 
 type VolumeMount struct {
@@ -93,8 +117,20 @@ type ProbeHttpGet struct {
 	HttpHeaders []*ListItem `json:"httpHeaders"`
 }
 
+func NewProbeHttpGet() *ProbeHttpGet {
+	return &ProbeHttpGet{
+		HttpHeaders: make([]*ListItem, 0),
+	}
+}
+
 type ProbeCommand struct {
 	Command []string `json:"command"`
+}
+
+func NewProbeCommand() *ProbeCommand {
+	return &ProbeCommand{
+		Command: make([]string, 0),
+	}
 }
 
 type ProbeTcpSocket struct {
@@ -127,6 +163,15 @@ type ContainerProbe struct {
 	*ProbeTime
 }
 
+func NewContainerProbe() *ContainerProbe {
+	return &ContainerProbe{
+		HttpGet:   NewProbeHttpGet(),
+		Exec:      NewProbeCommand(),
+		TcpSocket: &ProbeTcpSocket{},
+		ProbeTime: &ProbeTime{},
+	}
+}
+
 type ContainerPort struct {
 	Name          string `json:"name"`
 	ContainerPort int32  `json:"containerPort"`
@@ -144,11 +189,26 @@ type Container struct {
 	Args            []string         `json:"args"`
 	Envs            []*ListItem      `json:"envs"`
 	Privileged      bool             `json:"privileged"`
-	Resources       Resources        `json:"resources"`
+	Resources       *Resources       `json:"resources"`
 	VolumeMounts    []*VolumeMount   `json:"volumeMounts"`
 	StartupProbe    *ContainerProbe  `json:"startupProbe"`
 	LivenessProbe   *ContainerProbe  `json:"livenessProbe"`
 	ReadinessProbe  *ContainerProbe  `json:"readinessProbe"`
+}
+
+func NewContainer() *Container {
+	return &Container{
+		Ports:          make([]*ContainerPort, 0),
+		Command:        make([]string, 0),
+		Args:           make([]string, 0),
+		Envs:           make([]*ListItem, 0),
+		Privileged:     false,
+		Resources:      NewResources(),
+		VolumeMounts:   make([]*VolumeMount, 0),
+		StartupProbe:   nil,
+		LivenessProbe:  nil,
+		ReadinessProbe: nil,
+	}
 }
 
 type Pod struct {
@@ -160,6 +220,16 @@ type Pod struct {
 	InitContainers []*Container `json:"initContainers"`
 	//containers
 	Containers []*Container `json:"containers"`
+}
+
+func NewPod() *Pod {
+	return &Pod{
+		Base:           NewBase(),
+		Volumes:        make([]*Volume, 0),
+		NetWorking:     NewNetWorking(),
+		InitContainers: make([]*Container, 0),
+		Containers:     make([]*Container, 0),
+	}
 }
 
 type PodListItem struct {

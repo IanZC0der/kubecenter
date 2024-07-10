@@ -1,6 +1,6 @@
 swag:
 	@echo "Generating Swagger documentation..."
-	@swag init
+	@swag init --md ./swagmd
 
 run:
 	@echo "starting gin server..."
