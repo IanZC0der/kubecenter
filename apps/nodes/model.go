@@ -37,3 +37,25 @@ func NewNode() *Node {
 		Taints: make([]*corev1.Taint, 0),
 	}
 }
+
+type UpdateLabelRequest struct {
+	Name   string      `json:"name"`
+	Labels []*ListItem `json:"labels"`
+}
+
+func NewUpdateLabelRequest() *UpdateLabelRequest {
+	return &UpdateLabelRequest{
+		Labels: make([]*ListItem, 0),
+	}
+}
+
+type UpdateTaintRequest struct {
+	Name   string          `json:"name"`
+	Taints []*corev1.Taint `json:"taints"`
+}
+
+func NewUpdateTaintRequest() *UpdateTaintRequest {
+	return &UpdateTaintRequest{
+		Taints: make([]*corev1.Taint, 0),
+	}
+}

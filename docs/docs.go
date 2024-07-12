@@ -104,6 +104,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/nodes/updatelabels": {
+            "patch": {
+                "description": "updates the labels of a node, request body should specify the node name and the labels. old labels will be deleted.\n\nan example of the request body:\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"name\": \"ubuntu-s-2vcpu-4gb-sfo3-02\",\n  \"labels\": [\n    {\n      \"key\": \"test\",\n      \"value\": \"app\"\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodes"
+                ],
+                "summary": "update the labels of a node",
+                "parameters": [
+                    {
+                        "description": "new labels config",
+                        "name": "labels",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/nodes/updatetaints": {
+            "patch": {
+                "description": "updates the taints of a node, request body should specify the node name and the taints. old taints will be deleted.\n\nan example of the request body:\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"name\": \"ubuntu-s-2vcpu-4gb-sfo3-02\",\n  \"taints\": [\n    {\n      \"key\": \"test2\",\n      \"value\": \"app2\",\n      \"effect\": \"NoSchedule\"\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "nodes"
+                ],
+                "summary": "update the taints of a node",
+                "parameters": [
+                    {
+                        "description": "new taints config",
+                        "name": "taints",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/pods": {
             "get": {
                 "description": "get the pods list and name spaces",
