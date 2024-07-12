@@ -70,9 +70,18 @@ func GetBaseFromPod(pod *corev1.Pod) *Base {
 	return newBase
 }
 
+func GetTolerationsFromPod(pod *corev1.Pod) []*corev1.Toleration {
+	tls := make([]*corev1.Toleration, 0)
+	for _, tl := range pod.Spec.Tolerations {
+		tls = append(tls, &tl)
+	}
+	return tls
+}
+
 func GetPodInfoFromPod(pod *corev1.Pod) *Pod {
 	newPod := NewPod()
 	newPod.Base = GetBaseFromPod(pod)
+	newPod.Tolerations = GetTolerationsFromPod(pod)
 	newPod.NetWorking = GetNetworkingFromPod(pod)
 	for _, volume := range pod.Spec.Volumes {
 		if volume.EmptyDir == nil {
@@ -289,6 +298,7 @@ func CreatePodFromPodRequest(pod *Pod) *corev1.Pod {
 		},
 
 		Spec: corev1.PodSpec{
+			Tolerations:    GetK8sTolerations(pod.Tolerations),
 			InitContainers: GetK8SContainers(pod.InitContainers),
 			Containers:     GetK8SContainers(pod.Containers),
 			Volumes:        GetK8SPodVolumes(pod.Volumes),
@@ -301,6 +311,14 @@ func CreatePodFromPodRequest(pod *Pod) *corev1.Pod {
 			RestartPolicy: corev1.RestartPolicy(pod.Base.RestartPolicy),
 		},
 	}
+}
+
+func GetK8sTolerations(tolerations []*corev1.Toleration) []corev1.Toleration {
+	k8sTolerations := make([]corev1.Toleration, 0)
+	for _, toleration := range tolerations {
+		k8sTolerations = append(k8sTolerations, *toleration)
+	}
+	return k8sTolerations
 }
 
 func GetK8SPodBaseLabels(pod *Pod) map[string]string {

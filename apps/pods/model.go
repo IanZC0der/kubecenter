@@ -1,6 +1,9 @@
 package pods
 
-import "encoding/json"
+import (
+	"encoding/json"
+	corev1 "k8s.io/api/core/v1"
+)
 
 type Pods struct {
 	Items map[string][]string `json:"items"`
@@ -212,8 +215,9 @@ func NewContainer() *Container {
 }
 
 type Pod struct {
-	Base    *Base     `json:"base"`
-	Volumes []*Volume `json:"volumes"`
+	Base        *Base                `json:"base"`
+	Tolerations []*corev1.Toleration `json:"tolerations"`
+	Volumes     []*Volume            `json:"volumes"`
 	//网络相关
 	NetWorking *NetWorking `json:"netWorking"`
 	///init containers
@@ -225,6 +229,7 @@ type Pod struct {
 func NewPod() *Pod {
 	return &Pod{
 		Base:           NewBase(),
+		Tolerations:    make([]*corev1.Toleration, 0),
 		Volumes:        make([]*Volume, 0),
 		NetWorking:     NewNetWorking(),
 		InitContainers: make([]*Container, 0),
