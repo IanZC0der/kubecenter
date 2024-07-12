@@ -8,12 +8,21 @@ this is a web app for managing k8s resources
 ## Pods Management
 - get namespace list 
     - ```go
-      GetNamespaceList(ctx context.Context) (*NamespaceList, error)
-```
+      GetNamespaceList(ctx context.Context) (*NamespaceList, error)```
+
 - Pod create
 - Pod info
 - Pod edit
-- Pod delete: will not implement as resources limited
+- Pod delete
+
+## nodes
+
+node affinity scheduling
+
+
+
+
+
 
 ## push to /pull from harbor
 
