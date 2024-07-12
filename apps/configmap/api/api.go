@@ -31,6 +31,7 @@ func (h *ConfigmapApiHandler) Registry(router gin.IRouter) {
 	v1.GET("", h.GetConfigMaps)
 	v1.GET("/detail", h.GetConfigMapDetail)
 	v1.POST("", h.UpdateConfigMap)
+	v1.DELETE("", h.DeleteConfigMap)
 }
 
 // @Summary      get configmap list
@@ -99,4 +100,27 @@ func (h *ConfigmapApiHandler) UpdateConfigMap(c *gin.Context) {
 		return
 	}
 	response.Success(c, msg, k8sConfigMap)
+}
+
+// @Summary      delete a configmap
+// @Description	 delete a configmap
+// @Tags         configmap
+// @Accept       json
+// @Produce      json
+// @Param namespace query string true "the namespace of the configmap to be deleted"
+// @Param name query string true "the name of the configmap to be deleted"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /configmap [delete]
+func (h *ConfigmapApiHandler) DeleteConfigMap(c *gin.Context) {
+	ns := c.Query("namespace")
+	name := c.Query("name")
+
+	err := h.svc.DeleteConfigMap(c.Request.Context(), ns, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "delete config map success", ns)
 }

@@ -68,3 +68,7 @@ func (s *ConfigmapServiceImpl) CreateOrUpdateConfigMap(ctx context.Context, conf
 	}
 	return newcMap, "update config map success", nil
 }
+
+func (s *ConfigmapServiceImpl) DeleteConfigMap(ctx context.Context, namespace string, name string) error {
+	return global.KubeConfigSet.CoreV1().ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{})
+}
