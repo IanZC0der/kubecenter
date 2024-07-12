@@ -5,6 +5,7 @@ import (
 	"github.com/IanZC0der/kubecenter/apps/configmap"
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 )
@@ -46,4 +47,24 @@ func (s *ConfigmapServiceImpl) GetConfigMapDetail(ctx context.Context, namespace
 		return nil, err
 	}
 	return configmap.K8SConfigmapToConfigmap(item), nil
+}
+
+func (s *ConfigmapServiceImpl) CreateOrUpdateConfigMap(ctx context.Context, configMap *configmap.ConfigMap) (*corev1.ConfigMap, string, error) {
+	m := configmap.ConfigmapToK8SConfigmap(configMap)
+
+	_, err := global.KubeConfigSet.CoreV1().ConfigMaps(configMap.Namespace).Get(ctx, configMap.Name, metav1.GetOptions{})
+	if err != nil {
+		//create
+		newcMap, err := global.KubeConfigSet.CoreV1().ConfigMaps(m.Namespace).Create(ctx, m, metav1.CreateOptions{})
+		if err != nil {
+			return nil, "", err
+		}
+		return newcMap, "create config map success", nil
+	}
+	//update
+	newcMap, err := global.KubeConfigSet.CoreV1().ConfigMaps(m.Namespace).Update(ctx, m, metav1.UpdateOptions{})
+	if err != nil {
+		return nil, "", err
+	}
+	return newcMap, "update config map success", nil
 }

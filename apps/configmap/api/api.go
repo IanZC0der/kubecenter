@@ -30,6 +30,7 @@ func (h *ConfigmapApiHandler) Registry(router gin.IRouter) {
 	v1 := router.Group("configmap")
 	v1.GET("", h.GetConfigMaps)
 	v1.GET("/detail", h.GetConfigMapDetail)
+	v1.POST("", h.UpdateConfigMap)
 }
 
 // @Summary      get configmap list
@@ -74,4 +75,28 @@ func (h *ConfigmapApiHandler) GetConfigMapDetail(c *gin.Context) {
 		return
 	}
 	response.Success(c, "get the config map detail", cMap)
+}
+
+// @Summary      create/update configmap
+// @Description.markdown updateconfigmap
+// @Tags         configmap
+// @Accept       json
+// @Produce      json
+// @Param configmap body object true "the configs of the config map"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /configmap [post]
+func (h *ConfigmapApiHandler) UpdateConfigMap(c *gin.Context) {
+	cMap := configmap.NewConfigMap()
+	if err := c.BindJSON(cMap); err != nil {
+		response.Failed(c, err)
+		return
+	}
+	k8sConfigMap, msg, err := h.svc.CreateOrUpdateConfigMap(c.Request.Context(), cMap)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, msg, k8sConfigMap)
 }
