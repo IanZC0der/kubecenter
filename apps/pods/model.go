@@ -223,7 +223,8 @@ type Pod struct {
 	///init containers
 	InitContainers []*Container `json:"initContainers"`
 	//containers
-	Containers []*Container `json:"containers"`
+	Containers     []*Container    `json:"containers"`
+	NodeScheduling *NodeScheduling `json:"nodeScheduling"`
 }
 
 func NewPod() *Pod {
@@ -234,6 +235,7 @@ func NewPod() *Pod {
 		NetWorking:     NewNetWorking(),
 		InitContainers: make([]*Container, 0),
 		Containers:     make([]*Container, 0),
+		NodeScheduling: NewNodeScheduling(),
 	}
 }
 
@@ -260,5 +262,23 @@ type PodsList struct {
 func NewPodsItemsList() *PodsList {
 	return &PodsList{
 		Items: make([]*PodListItem, 0),
+	}
+}
+
+type NodeSelectorTermExpressions struct {
+	Key      string                      `json:"key"`
+	Operator corev1.NodeSelectorOperator `json:"operator"`
+	Value    string                      `json:"value"`
+}
+type NodeScheduling struct {
+	Type         string                         `json:"type"`
+	NodeName     string                         `json:"nodeName"`
+	NodeAffinity []*NodeSelectorTermExpressions `json:"nodeAffinity"`
+}
+
+func NewNodeScheduling() *NodeScheduling {
+	return &NodeScheduling{
+		Type:         SCHEDULING_ANY,
+		NodeAffinity: make([]*NodeSelectorTermExpressions, 0),
 	}
 }

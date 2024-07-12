@@ -15,6 +15,72 @@ info:
   title: Kubecenter API doc
   version: "1.0"
 paths:
+  /configmap:
+    get:
+      consumes:
+      - application/json
+      description: get configmap list
+      parameters:
+      - description: Retrieve the configmap list based on the namespace, not required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the configmap list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get configmap list
+      tags:
+      - configmap
+  /configmap/detail:
+    get:
+      consumes:
+      - application/json
+      description: get configmap detail
+      parameters:
+      - description: Retrieve the configmap detail based on the namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Retrieve the configmap detail based on the name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get configmap detail
+      tags:
+      - configmap
   /nodes:
     get:
       consumes:
@@ -222,138 +288,46 @@ paths:
     post:
       consumes:
       - application/json
-      description: |-
-        creates a new Kubernetes pod with detailed configurations, an example of pod config:
-
-        ```json
-        {
-          "base": {
-            "name": "test",
-            "namespace": "test",
-            "labels": [
-              {
-                "key": "app",
-                "value": "test"
-              }
-            ],
-            "restartPolicy": "Always"
-          },
-          "volumes": [
-            {
-              "name": "cache-volume",
-              "type": "emptyDir"
-            }
-          ],
-          "netWorking": {
-            "hostNetwork": true,
-            "hostName": "test",
-            "dnsPolicy": "Default",
-            "dnsConfig": {
-              "nameservers": [
-                "8.8.8.8"
-              ]
-            },
-            "hostAliases": [
-              {
-                "key": "64.23.172.139",
-                "value": "foo.bar,foo2.bar"
-              }
-            ]
-          },
-          "initContainers": [
-            {
-              "name": "busybox",
-              "image": "busybox",
-              "imagePullPolicy": "IfNotPresent",
-              "command": [
-                "echo"
-              ],
-              "args": [
-                "hello world"
-              ]
-            }
-          ],
-          "containers": [
-            {
-              "name": "nginx",
-              "image": "nginx",
-              "imagePullPolicy": "IfNotPresent",
-              "privileged": true,
-              "tty": true,
-              "workingDir": "/test",
-              "envs": [
-                {
-                  "key": "foo",
-                  "value": "bar"
-                }
-              ],
-              "startupProbe": {
-                "enable": true,
-                "type": "http",
-                "httpGet": {
-                  "scheme": "HTTP",
-                  "host": "",
-                  "path": "/",
-                  "port": 80,
-                  "httpHeaders": [
-                    {
-                      "key": "foo",
-                      "value": "bar"
-                    }
-                  ]
-                },
-                "initialDelaySeconds": 10,
-                "periodSeconds": 5,
-                "timeoutSeconds": 10,
-                "successThreshold": 1,
-                "failureThreshold": 10
-              },
-              "livenessProbe": {
-                "enable": true,
-                "type": "tcp",
-                "tcpSocket": {
-                  "host": "",
-                  "port": 80
-                },
-                "initialDelaySeconds": 10,
-                "periodSeconds": 5,
-                "timeoutSeconds": 10,
-                "successThreshold": 1,
-                "failureThreshold": 10
-              },
-              "readinessProbe": {
-                "enable": true,
-                "type": "exec",
-                "exec": {
-                  "command": [
-                    "echo",
-                    "helloworld"
-                  ]
-                },
-                "initialDelaySeconds": 10,
-                "periodSeconds": 5,
-                "timeoutSeconds": 10,
-                "successThreshold": 1,
-                "failureThreshold": 10
-              },
-              "resources": {
-                "enable": true,
-                "memRequest": 128,
-                "memLimit": 128,
-                "cpuRequest": 100,
-                "cpuLimit": 100
-              },
-              "volumeMounts": [
-                {
-                  "mountName": "cache-volume",
-                  "mountPath": "/test",
-                  "readyOnly": false
-                }
-              ]
-            }
-          ]
-        }
-        ```
+      description: "creates a new Kubernetes pod with detailed configurations, configuring
+        scheduling is also supported.\n\ntwo types of scheduling are supported: \n1.
+        node name\n2. affinity\n\nan example of pod config:\n\n```json\n{\n  \"base\":
+        {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\":
+        [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n
+        \   ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"nodeScheduling\": {\n
+        \   \"type\": \"nodeAffinity\",\n    \"nodeAffinity\": [\n      {\n        \"key\":
+        \"test\",\n        \"value\": \"app\",\n        \"operator\": \"In\"\n\n      }\n
+        \   ]\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n
+        \     \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\":
+        true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\":
+        {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\":
+        [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n
+        \     }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n
+        \     \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n
+        \     \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello
+        world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\":
+        \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n
+        \     \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n
+        \     \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\":
+        \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\":
+        true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\":
+        \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\":
+        80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n
+        \             \"value\": \"bar\"\n            }\n          ]\n        },\n
+        \       \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\":
+        10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n
+        \     },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\":
+        \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\":
+        80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\":
+        5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\":
+        10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\":
+        \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n
+        \           \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\":
+        10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\":
+        1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\":
+        true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\":
+        100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n
+        \         \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n
+        \         \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n```"
       parameters:
       - description: Pod Configuration
         in: body

@@ -1,4 +1,10 @@
-creates a new Kubernetes pod with detailed configurations, an example of pod config:
+creates a new Kubernetes pod with detailed configurations, configuring scheduling is also supported.
+
+two types of scheduling are supported: 
+1. node name
+2. affinity
+
+an example of pod config:
 
 ```json
 {
@@ -12,6 +18,17 @@ creates a new Kubernetes pod with detailed configurations, an example of pod con
       }
     ],
     "restartPolicy": "Always"
+  },
+  "nodeScheduling": {
+    "type": "nodeAffinity",
+    "nodeAffinity": [
+      {
+        "key": "test",
+        "value": "app",
+        "operator": "In"
+
+      }
+    ]
   },
   "volumes": [
     {
