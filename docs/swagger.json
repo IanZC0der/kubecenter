@@ -396,6 +396,56 @@
                 }
             }
         },
+        "/pods/nodepods/{nodename}": {
+            "get": {
+                "description": "get the pods list within a node, with optional keyword",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pods"
+                ],
+                "summary": "get the pods list within a node",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the node",
+                        "name": "nodename",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter pods by keyword",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/pods/poddetail/{namespace}": {
             "get": {
                 "description": "get a pod detail under a namespace",
@@ -472,6 +522,12 @@
                         "type": "string",
                         "description": "Filter pods by keyword",
                         "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter pods by nodename",
+                        "name": "nodename",
                         "in": "query"
                     }
                 ],

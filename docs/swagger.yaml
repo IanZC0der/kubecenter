@@ -554,6 +554,10 @@ paths:
         in: query
         name: keyword
         type: string
+      - description: Filter pods by nodename
+        in: query
+        name: nodename
+        type: string
       produces:
       - application/json
       responses:
@@ -593,6 +597,39 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: get the namespace list
+      tags:
+      - pods
+  /pods/nodepods/{nodename}:
+    get:
+      consumes:
+      - application/json
+      description: get the pods list within a node, with optional keyword
+      parameters:
+      - description: Name of the node
+        in: path
+        name: nodename
+        required: true
+        type: string
+      - description: Filter pods by keyword
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get the pods list within a node
       tags:
       - pods
   /pods/poddetail/{namespace}:
