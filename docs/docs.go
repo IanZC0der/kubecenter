@@ -64,6 +64,50 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "create/update a config map. the configurations of the configmap should be specified in the request\nbody. \n\nan example of request body:\n\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"cm\",\n      \"value\": \"test\"\n    },\n    {\n      \"key\": \"cm2\",\n      \"value\": \"test2\"\n    }\n  ],\n  \"data\": [\n    {\n      \"key\": \"testKey\",\n      \"value\": \"testValue\"\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configmap"
+                ],
+                "summary": "create/update configmap",
+                "parameters": [
+                    {
+                        "description": "the configs of the config map",
+                        "name": "configmap",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
             }
         },
         "/configmap/detail": {
