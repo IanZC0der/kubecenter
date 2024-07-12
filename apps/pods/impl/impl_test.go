@@ -1,4 +1,4 @@
-package impl
+package impl_test
 
 import (
 	"context"
