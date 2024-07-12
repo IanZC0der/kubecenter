@@ -2,10 +2,12 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/IanZC0der/kubecenter/apps/nodes"
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"strings"
 )
 
@@ -50,4 +52,43 @@ func (s *NodesServiceImpl) GetNodeDetail(ctx context.Context, name string) (*nod
 	}
 	res := nodes.GetNodeDetailFromK8SNode(k8sNode)
 	return res, nil
+}
+
+func (s *NodesServiceImpl) UpdateLabel(ctx context.Context, req *nodes.UpdateLabelRequest) error {
+	labelsMap := make(map[string]string, 0)
+	for _, label := range req.Labels {
+		labelsMap[label.Key] = label.Value
+	}
+	labelsMap["$patch"] = "replace"
+	patchData := map[string]any{
+		"metadata": map[string]any{
+			"labels": labelsMap,
+		},
+	}
+	patchDataBytes, _ := json.Marshal(&patchData)
+	_, err := global.KubeConfigSet.CoreV1().Nodes().Patch(
+		ctx,
+		req.Name,
+		types.StrategicMergePatchType,
+		patchDataBytes,
+		metav1.PatchOptions{},
+	)
+	return err
+}
+
+func (s *NodesServiceImpl) UpdateTaints(ctx context.Context, req *nodes.UpdateTaintRequest) error {
+	patchData := map[string]any{
+		"spec": map[string]any{
+			"taints": req.Taints,
+		},
+	}
+	patchDataBytes, _ := json.Marshal(&patchData)
+	_, err := global.KubeConfigSet.CoreV1().Nodes().Patch(
+		context.TODO(),
+		req.Name,
+		types.StrategicMergePatchType,
+		patchDataBytes,
+		metav1.PatchOptions{},
+	)
+	return err
 }

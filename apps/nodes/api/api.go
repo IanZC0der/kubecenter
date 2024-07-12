@@ -30,6 +30,8 @@ func (n *NodesApiHandler) Registry(router gin.IRouter) {
 	v1 := router.Group("nodes")
 	v1.GET("", n.GetNodesList)
 	v1.GET("/detail", n.GetNodeDetail)
+	v1.PATCH("/updatelabels", n.UpdateLabels)
+	v1.PATCH("/updatetaints", n.UpdateTaints)
 }
 
 // @Summary      get nodes list
@@ -47,6 +49,7 @@ func (n *NodesApiHandler) GetNodesList(c *gin.Context) {
 	nodesList, err := n.svc.GetNodeList(c.Request.Context(), keyword)
 	if err != nil {
 		response.Failed(c, err)
+		return
 	}
 	response.Success(c, "ok", nodesList)
 }
@@ -66,7 +69,54 @@ func (n *NodesApiHandler) GetNodeDetail(c *gin.Context) {
 	node, err := n.svc.GetNodeDetail(c.Request.Context(), name)
 	if err != nil {
 		response.Failed(c, err)
+		return
 	}
 	response.Success(c, "ok", node)
 
+}
+
+// @Summary      update the labels of a node
+// @Description.markdown updatelabel
+// @Tags         nodes
+// @Accept       json
+// @Produce      json
+// @Param labels body object true "new labels config"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /nodes/updatelabels [patch]
+func (n *NodesApiHandler) UpdateLabels(c *gin.Context) {
+	req := nodes.NewUpdateLabelRequest()
+	if err := c.ShouldBindJSON(req); err != nil {
+		response.Failed(c, err)
+		return
+	}
+	err := n.svc.UpdateLabel(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c, err)
+	}
+	response.Success(c, "update label success", nil)
+}
+
+// @Summary      update the taints of a node
+// @Description.markdown updatetaint
+// @Tags         nodes
+// @Accept       json
+// @Produce      json
+// @Param taints body object true "new taints config"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /nodes/updatetaints [patch]
+func (n *NodesApiHandler) UpdateTaints(c *gin.Context) {
+	req := nodes.NewUpdateTaintRequest()
+	if err := c.ShouldBindJSON(req); err != nil {
+		response.Failed(c, err)
+		return
+	}
+	err := n.svc.UpdateTaints(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c, err)
+	}
+	response.Success(c, "update taint success", nil)
 }

@@ -9,4 +9,6 @@ const (
 type Service interface {
 	GetNodeList(context.Context, string) ([]*Node, error)
 	GetNodeDetail(context.Context, string) (*Node, error)
+	UpdateLabel(context.Context, *UpdateLabelRequest) error
+	UpdateTaints(ctx context.Context, request *UpdateTaintRequest) error
 }

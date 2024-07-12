@@ -72,6 +72,97 @@ paths:
       summary: get the detail of a node
       tags:
       - nodes
+  /nodes/updatelabels:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        updates the labels of a node, request body should specify the node name and the labels. old labels will be deleted.
+
+        an example of the request body:
+
+        ```json
+        {
+          "name": "ubuntu-s-2vcpu-4gb-sfo3-02",
+          "labels": [
+            {
+              "key": "test",
+              "value": "app"
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: new labels config
+        in: body
+        name: labels
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: update the labels of a node
+      tags:
+      - nodes
+  /nodes/updatetaints:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        updates the taints of a node, request body should specify the node name and the taints. old taints will be deleted.
+
+        an example of the request body:
+
+        ```json
+        {
+          "name": "ubuntu-s-2vcpu-4gb-sfo3-02",
+          "taints": [
+            {
+              "key": "test2",
+              "value": "app2",
+              "effect": "NoSchedule"
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: new taints config
+        in: body
+        name: taints
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: update the taints of a node
+      tags:
+      - nodes
   /pods:
     delete:
       consumes:
