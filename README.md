@@ -17,7 +17,15 @@ this is a web app for managing k8s resources
 
 ## nodes
 
-node affinity scheduling
+- [x] Get node list
+- [x] Get node detail
+- [x] Update node labels
+- [x] Update node taints
+
+
+
+## Config Map
+
 
 
 

@@ -21,6 +21,10 @@ const (
 	PROBE_HTTP                     = "http"
 	PROBE_TCP                      = "tcp"
 	PROBE_EXEC                     = "exec"
+	SCHEDULING_NODENAME            = "nodeName"
+	SCHEDULING_AFFINITY            = "nodeAffinity"
+	SCHEDULING_ANY                 = "nodeAny"
+	SCHEDULING_NODESELECTOR        = "nodeSelector"
 )
 
 var volumeMap = make(map[string]string)
@@ -78,11 +82,41 @@ func GetTolerationsFromPod(pod *corev1.Pod) []*corev1.Toleration {
 	return tls
 }
 
+func getSchedulingFromK8SPod(pod *corev1.Pod) *NodeScheduling {
+	s := NewNodeScheduling()
+	if pod.Spec.Affinity != nil {
+		s.Type = SCHEDULING_AFFINITY
+		term := pod.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0]
+		matchExpressions := make([]*NodeSelectorTermExpressions, 0)
+		for _, expression := range term.MatchExpressions {
+			matchExpressions = append(matchExpressions, &NodeSelectorTermExpressions{
+				Key:      expression.Key,
+				Value:    strings.Join(expression.Values, ","),
+				Operator: expression.Operator,
+			})
+		}
+		s.NodeAffinity = matchExpressions
+		return s
+	}
+	if pod.Spec.NodeSelector != nil {
+		s.Type = SCHEDULING_NODESELECTOR
+		return s
+	}
+	if pod.Spec.NodeName != "" {
+		s.Type = SCHEDULING_NODENAME
+		s.NodeName = pod.Spec.NodeName
+		return s
+	}
+
+	return s
+}
+
 func GetPodInfoFromPod(pod *corev1.Pod) *Pod {
 	newPod := NewPod()
 	newPod.Base = GetBaseFromPod(pod)
 	newPod.Tolerations = GetTolerationsFromPod(pod)
 	newPod.NetWorking = GetNetworkingFromPod(pod)
+	newPod.NodeScheduling = getSchedulingFromK8SPod(pod)
 	for _, volume := range pod.Spec.Volumes {
 		if volume.EmptyDir == nil {
 			continue
@@ -289,7 +323,41 @@ func PodCreateValidate(pod *Pod) error {
 	return nil
 }
 
+func GetSchedulingFromPodRequest(pod *Pod) (*corev1.Affinity, string) {
+	scheduling := pod.NodeScheduling
+	switch scheduling.Type {
+	case SCHEDULING_NODENAME:
+		nodeName := scheduling.NodeName
+		return nil, nodeName
+	case SCHEDULING_AFFINITY:
+		matchExpression := make([]corev1.NodeSelectorRequirement, 0)
+		for _, expression := range scheduling.NodeAffinity {
+			matchExpression = append(matchExpression, corev1.NodeSelectorRequirement{
+				Key:      expression.Key,
+				Values:   strings.Split(expression.Value, ","),
+				Operator: expression.Operator,
+			})
+		}
+		affinity := &corev1.Affinity{
+			NodeAffinity: &corev1.NodeAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+					NodeSelectorTerms: []corev1.NodeSelectorTerm{
+						{
+							MatchExpressions: matchExpression,
+						},
+					},
+				},
+			},
+		}
+		return affinity, ""
+	case SCHEDULING_ANY:
+	}
+	return nil, ""
+
+}
+
 func CreatePodFromPodRequest(pod *Pod) *corev1.Pod {
+	affinity, nodeName := GetSchedulingFromPodRequest(pod)
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      pod.Base.Name,
@@ -298,6 +366,8 @@ func CreatePodFromPodRequest(pod *Pod) *corev1.Pod {
 		},
 
 		Spec: corev1.PodSpec{
+			NodeName:       nodeName,
+			Affinity:       affinity,
 			Tolerations:    GetK8sTolerations(pod.Tolerations),
 			InitContainers: GetK8SContainers(pod.InitContainers),
 			Containers:     GetK8SContainers(pod.Containers),

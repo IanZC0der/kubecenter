@@ -17,6 +17,106 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/configmap": {
+            "get": {
+                "description": "get configmap list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configmap"
+                ],
+                "summary": "get configmap list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the configmap list based on the namespace, not required",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the configmap list based on the keyword, not required",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/configmap/detail": {
+            "get": {
+                "description": "get configmap detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configmap"
+                ],
+                "summary": "get configmap detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the configmap detail based on the namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the configmap detail based on the name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/nodes": {
             "get": {
                 "description": "get nodes list",
@@ -275,7 +375,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "creates a new Kubernetes pod with detailed configurations, an example of pod config:\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\": \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
+                "description": "creates a new Kubernetes pod with detailed configurations, configuring scheduling is also supported.\n\ntwo types of scheduling are supported: \n1. node name\n2. affinity\n\nan example of pod config:\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"nodeScheduling\": {\n    \"type\": \"nodeAffinity\",\n    \"nodeAffinity\": [\n      {\n        \"key\": \"test\",\n        \"value\": \"app\",\n        \"operator\": \"In\"\n\n      }\n    ]\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\": \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
                 "consumes": [
                     "application/json"
                 ],
