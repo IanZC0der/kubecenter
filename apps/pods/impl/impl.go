@@ -58,6 +58,25 @@ func (s *PodsServerImpl) GetNamespaceList(ctx context.Context) (*pods.NamespaceL
 	return namespaceList, nil
 }
 
+func (s *PodsServerImpl) GetPodsListWithinNode(ctx context.Context, keyword string, nodeName string) (*pods.PodsList, error) {
+	podsList := pods.NewPodsItemsList()
+
+	c := context.TODO()
+	list, err := global.KubeConfigSet.CoreV1().Pods("").List(c, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range list.Items {
+		if nodeName != "" && item.Spec.NodeName != nodeName {
+			continue
+		}
+		if strings.Contains(item.Name, keyword) {
+			podsList.Items = append(podsList.Items, pods.GetPodListItemFromPod(&item))
+		}
+	}
+	return podsList, nil
+}
+
 func (s *PodsServerImpl) GetPodsListUnderNamespaceWithKeyword(ctx context.Context, namespace string, keyword string) (*pods.PodsList, error) {
 	podsList := pods.NewPodsItemsList()
 

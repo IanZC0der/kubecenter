@@ -31,6 +31,7 @@ func (p *PodsApiHandler) Registry(router gin.IRouter) {
 	v1.GET("", p.GetPods)
 	v1.GET("/namespacelist", p.GetNamespaceList)
 	v1.GET("/:namespace", p.GetPodsListUnderNamespace)
+	v1.GET("/nodepods/:nodename", p.GetPodsListWithNode)
 	v1.GET("/poddetail/:namespace", p.GetPodDetail)
 	v1.POST("", p.CreatePods)
 	v1.PUT("", p.UpdatePod)
@@ -82,6 +83,7 @@ func (p *PodsApiHandler) GetNamespaceList(c *gin.Context) {
 // @Produce      json
 // @Param namespace path string true "Namespace"
 // @Param keyword query string false "Filter pods by keyword"
+// @Param nodename query string false "Filter pods by nodename"
 // @Success      200  {object}  response.Response
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -89,8 +91,33 @@ func (p *PodsApiHandler) GetNamespaceList(c *gin.Context) {
 func (p *PodsApiHandler) GetPodsListUnderNamespace(c *gin.Context) {
 	namespace := c.Param("namespace")
 	keyword := c.Query("keyword")
+	//nodeName := c.Query("nodename")
 
 	podsList, err := p.svc.GetPodsListUnderNamespaceWithKeyword(c.Request.Context(), namespace, keyword)
+
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get the pods list", podsList)
+}
+
+// @Summary      get the pods list within a node
+// @Description	 get the pods list within a node, with optional keyword
+// @Tags         pods
+// @Accept       json
+// @Produce      json
+// @Param nodename path string true "Name of the node"
+// @Param keyword query string false "Filter pods by keyword"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pods/nodepods/{nodename} [get]
+func (p *PodsApiHandler) GetPodsListWithNode(c *gin.Context) {
+	nodeName := c.Param("nodename")
+	keyword := c.Query("keyword")
+
+	podsList, err := p.svc.GetPodsListWithinNode(c.Request.Context(), keyword, nodeName)
 
 	if err != nil {
 		response.Failed(c, err)
