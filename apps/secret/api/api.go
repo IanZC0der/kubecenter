@@ -29,6 +29,8 @@ func (s *SecretApiHandler) Name() string {
 func (s *SecretApiHandler) Registry(router gin.IRouter) {
 	v1 := router.Group("secrets")
 	v1.GET("", s.GetSecrets)
+	v1.GET("/detail", s.GetSecretDetail)
+	v1.POST("", s.CreateOrUpdateSecret)
 
 }
 
@@ -51,5 +53,51 @@ func (s *SecretApiHandler) GetSecrets(c *gin.Context) {
 		response.Failed(c, err)
 		return
 	}
-	response.Success(c, "get the config maps", maps)
+	response.Success(c, "get the secret list", maps)
+}
+
+// @Summary      get secret detail
+// @Description	 get secret detail
+// @Tags         secret
+// @Accept       json
+// @Produce      json
+// @Param namespace query string true "Retrieve the secret detail based on the namespace"
+// @Param name query string true "Retrieve the secret detail based on the name"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /secrets/detail [get]
+func (s *SecretApiHandler) GetSecretDetail(c *gin.Context) {
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+	cMap, err := s.svc.GetSecretDetail(c.Request.Context(), namespace, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get the secret detail", cMap)
+}
+
+// @Summary      create/update secret
+// @Description.markdown updatesecret
+// @Tags         secret
+// @Accept       json
+// @Produce      json
+// @Param secret body object true "the configs of the secret"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /secrets [post]
+func (s *SecretApiHandler) CreateOrUpdateSecret(c *gin.Context) {
+	newSecret := secret.NewSecret()
+	if err := c.BindJSON(newSecret); err != nil {
+		response.Failed(c, err)
+		return
+	}
+	k8sSecret, msg, err := s.svc.UpdateSecret(c.Request.Context(), newSecret)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, msg, k8sSecret)
 }

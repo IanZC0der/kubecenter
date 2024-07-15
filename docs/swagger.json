@@ -793,6 +793,101 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "create/update a secret. the configurations of the secret should be specified in the request\nbody.\n\nan example of request body:\n\n\n```json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"type\": \"Opaque\",\n  \"labels\": [\n    {\n      \"key\": \"cm\",\n      \"value\": \"test\"\n    }\n  ],\n  \"data\": [\n    {\n      \"key\": \"testKey\",\n      \"value\": \"dGVzdFZhbHVl\"\n    }\n  ]\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "secret"
+                ],
+                "summary": "create/update secret",
+                "parameters": [
+                    {
+                        "description": "the configs of the secret",
+                        "name": "secret",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/secrets/detail": {
+            "get": {
+                "description": "get secret detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "secret"
+                ],
+                "summary": "get secret detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the secret detail based on the namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the secret detail based on the name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
             }
         }
     },
