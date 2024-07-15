@@ -39,3 +39,11 @@ func TestSecretServiceImpl_GetSecretsList(t *testing.T) {
 	}
 	t.Log(l)
 }
+
+func TestSecretServiceImpl_GetSecret(t *testing.T) {
+	s, err := secretSvc.GetSecretDetail(ctx, "kube-public", "default-token-jccjp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(s)
+}

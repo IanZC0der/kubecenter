@@ -739,4 +739,92 @@ paths:
       summary: get secret list
       tags:
       - secret
+    post:
+      consumes:
+      - application/json
+      description: |-
+        create/update a secret. the configurations of the secret should be specified in the request
+        body.
+
+        an example of request body:
+
+
+        ```json
+        {
+          "name": "test",
+          "namespace": "test",
+          "type": "Opaque",
+          "labels": [
+            {
+              "key": "cm",
+              "value": "test"
+            }
+          ],
+          "data": [
+            {
+              "key": "testKey",
+              "value": "dGVzdFZhbHVl"
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: the configs of the secret
+        in: body
+        name: secret
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create/update secret
+      tags:
+      - secret
+  /secrets/detail:
+    get:
+      consumes:
+      - application/json
+      description: get secret detail
+      parameters:
+      - description: Retrieve the secret detail based on the namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Retrieve the secret detail based on the name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get secret detail
+      tags:
+      - secret
 swagger: "2.0"
