@@ -25,6 +25,8 @@ const (
 	SCHEDULING_AFFINITY            = "nodeAffinity"
 	SCHEDULING_ANY                 = "nodeAny"
 	SCHEDULING_NODESELECTOR        = "nodeSelector"
+	REF_TYPE_CONFIGMAP             = "configMap"
+	REF_TYPE_SECRET                = "secret"
 )
 
 var volumeMap = make(map[string]string)
@@ -174,12 +176,14 @@ func GetContainerFromPod(ctner *corev1.Container) *Container {
 	newContainer.Command = ctner.Command
 	newContainer.Args = ctner.Args
 
-	for _, env := range ctner.Env {
-		newContainer.Envs = append(newContainer.Envs, &ListItem{
-			Key:   env.Name,
-			Value: env.Value,
-		})
-	}
+	//for _, env := range ctner.Env {
+	//	newContainer.Envs = append(newContainer.Envs, &ListItem{
+	//		Key:   env.Name,
+	//		Value: env.Value,
+	//	})
+	//}
+	newContainer.Envs = GetReqContainersEnvs(ctner.Env)
+	newContainer.EnvsFrom = GetReqContainersEnvsFrom(ctner.EnvFrom)
 
 	for _, port := range ctner.Ports {
 		newContainer.Ports = append(newContainer.Ports, &ContainerPort{
@@ -422,7 +426,8 @@ func GetK8SConinter(ctner *Container) corev1.Container {
 			Privileged: &ctner.Privileged,
 		},
 		Ports:          GetK8SContainerPorts(ctner.Ports),
-		Env:            GetK8SEnv(ctner.Envs),
+		Env:            GetK8SEnvs(ctner.Envs),
+		EnvFrom:        GetK8SEnvFromEnv(ctner.EnvsFrom),
 		VolumeMounts:   GetK8SVolumeMounts(ctner.VolumeMounts),
 		StartupProbe:   GetK8SContainerProbe(ctner.StartupProbe),
 		ReadinessProbe: GetK8SContainerProbe(ctner.ReadinessProbe),
@@ -558,4 +563,110 @@ func GetK8SHostAliases(podAls []*ListItem) []corev1.HostAlias {
 		})
 	}
 	return podk8sAliases
+}
+
+func GetK8SEnvFromEnv(envs []*EnvVarFromResource) []corev1.EnvFromSource {
+	k8sEnvFromSources := make([]corev1.EnvFromSource, 0)
+
+	for _, item := range envs {
+		envFromSource := corev1.EnvFromSource{
+			Prefix: item.Prefix,
+		}
+
+		switch item.RefType {
+		case REF_TYPE_CONFIGMAP:
+			envFromSource.ConfigMapRef = &corev1.ConfigMapEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: item.Name,
+				},
+			}
+			k8sEnvFromSources = append(k8sEnvFromSources, envFromSource)
+		case REF_TYPE_SECRET:
+			envFromSource.SecretRef = &corev1.SecretEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: item.Name,
+				},
+			}
+			k8sEnvFromSources = append(k8sEnvFromSources, envFromSource)
+		}
+	}
+	return k8sEnvFromSources
+}
+
+func GetK8SEnvs(envs []*EnvVar) []corev1.EnvVar {
+	podEnvs := make([]corev1.EnvVar, 0)
+	for _, item := range envs {
+		envVar := corev1.EnvVar{
+			Name: item.Name,
+		}
+		switch item.Type {
+		case REF_TYPE_CONFIGMAP:
+			envVar.ValueFrom = &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					Key: item.Value,
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: item.RefName,
+					},
+				},
+			}
+		case REF_TYPE_SECRET:
+			envVar.ValueFrom = &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					Key: item.Value,
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: item.RefName,
+					},
+				},
+			}
+		default:
+			envVar.Value = item.Value
+		}
+		podEnvs = append(podEnvs, envVar)
+	}
+	return podEnvs
+}
+
+func GetReqContainersEnvsFrom(k8sEnvsFrom []corev1.EnvFromSource) []*EnvVarFromResource {
+	envs := make([]*EnvVarFromResource, 0)
+	for _, item := range k8sEnvsFrom {
+		podReqEnvFrom := &EnvVarFromResource{
+			Prefix: item.Prefix,
+		}
+		if item.ConfigMapRef != nil {
+			podReqEnvFrom.RefType = REF_TYPE_CONFIGMAP
+			podReqEnvFrom.Name = item.ConfigMapRef.Name
+		}
+		if item.SecretRef != nil {
+			podReqEnvFrom.RefType = REF_TYPE_SECRET
+			podReqEnvFrom.Name = item.SecretRef.Name
+		}
+		envs = append(envs, podReqEnvFrom)
+	}
+	return envs
+}
+
+func GetReqContainersEnvs(k8sEnvs []corev1.EnvVar) []*EnvVar {
+	envs := make([]*EnvVar, 0)
+	for _, item := range k8sEnvs {
+		envVar := &EnvVar{
+			Name: item.Name,
+		}
+		if item.ValueFrom != nil {
+			if item.ValueFrom.ConfigMapKeyRef != nil {
+				envVar.Type = REF_TYPE_CONFIGMAP
+				envVar.Value = item.ValueFrom.ConfigMapKeyRef.Key
+				envVar.RefName = item.ValueFrom.ConfigMapKeyRef.Name
+			}
+			if item.ValueFrom.SecretKeyRef != nil {
+				envVar.Type = REF_TYPE_SECRET
+				envVar.Value = item.ValueFrom.SecretKeyRef.Key
+				envVar.RefName = item.ValueFrom.SecretKeyRef.Name
+			}
+		} else {
+			envVar.Type = "default"
+			envVar.Value = item.Value
+		}
+		envs = append(envs, envVar)
+	}
+	return envs
 }

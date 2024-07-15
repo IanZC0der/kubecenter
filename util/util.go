@@ -7,8 +7,8 @@ type ListItem struct {
 
 func MapConverter(data []*ListItem) map[string]string {
 	dataMap := make(map[string]string)
-	for _, data := range data {
-		dataMap[data.Key] = data.Value
+	for _, item := range data {
+		dataMap[item.Key] = item.Value
 	}
 	return dataMap
 }

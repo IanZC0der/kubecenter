@@ -22,6 +22,14 @@ an example of request body:
     {
       "key": "testKey",
       "value": "testValue"
+    },
+    {
+      "key": "db_name",
+      "value": "testdb"
+    },
+    {
+      "key": "db_host",
+      "value": "127.0.0.1"
     }
   ]
 }

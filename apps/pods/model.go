@@ -181,22 +181,39 @@ type ContainerPort struct {
 	HostPort      int32  `json:"hostPort"`
 }
 
+type EnvVar struct {
+	Name    string `json:"name"`
+	RefName string `json:"refName"`
+	Value   string `json:"value"`
+	// configmap | secret | k:val
+	Type string `json:"type"`
+}
+
+type EnvVarFromResource struct {
+	Name string `json:"name"`
+	// configmap | secret
+	RefType string `json:"refType"`
+	// prefix of env var
+	Prefix string `json:"prefix"`
+}
+
 type Container struct {
-	Name            string           `json:"name"`
-	Image           string           `json:"image"`
-	ImagePullPolicy string           `json:"imagePullPolicy"`
-	Tty             bool             `json:"tty"`
-	Ports           []*ContainerPort `json:"ports"`
-	WorkingDir      string           `json:"workingDir"`
-	Command         []string         `json:"command"`
-	Args            []string         `json:"args"`
-	Envs            []*ListItem      `json:"envs"`
-	Privileged      bool             `json:"privileged"`
-	Resources       *Resources       `json:"resources"`
-	VolumeMounts    []*VolumeMount   `json:"volumeMounts"`
-	StartupProbe    *ContainerProbe  `json:"startupProbe"`
-	LivenessProbe   *ContainerProbe  `json:"livenessProbe"`
-	ReadinessProbe  *ContainerProbe  `json:"readinessProbe"`
+	Name            string                `json:"name"`
+	Image           string                `json:"image"`
+	ImagePullPolicy string                `json:"imagePullPolicy"`
+	Tty             bool                  `json:"tty"`
+	Ports           []*ContainerPort      `json:"ports"`
+	WorkingDir      string                `json:"workingDir"`
+	Command         []string              `json:"command"`
+	Args            []string              `json:"args"`
+	Envs            []*EnvVar             `json:"envs"`
+	EnvsFrom        []*EnvVarFromResource `json:"envsFrom"`
+	Privileged      bool                  `json:"privileged"`
+	Resources       *Resources            `json:"resources"`
+	VolumeMounts    []*VolumeMount        `json:"volumeMounts"`
+	StartupProbe    *ContainerProbe       `json:"startupProbe"`
+	LivenessProbe   *ContainerProbe       `json:"livenessProbe"`
+	ReadinessProbe  *ContainerProbe       `json:"readinessProbe"`
 }
 
 func NewContainer() *Container {
@@ -204,7 +221,8 @@ func NewContainer() *Container {
 		Ports:          make([]*ContainerPort, 0),
 		Command:        make([]string, 0),
 		Args:           make([]string, 0),
-		Envs:           make([]*ListItem, 0),
+		Envs:           make([]*EnvVar, 0),
+		EnvsFrom:       make([]*EnvVarFromResource, 0),
 		Privileged:     false,
 		Resources:      NewResources(),
 		VolumeMounts:   make([]*VolumeMount, 0),
