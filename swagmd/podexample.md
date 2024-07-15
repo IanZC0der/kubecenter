@@ -75,8 +75,21 @@ an example of pod config:
       "workingDir": "/test",
       "envs": [
         {
-          "key": "foo",
+          "name": "foo",
           "value": "bar"
+        },
+        {
+          "name": "new_db_name",
+          "type": "configMap",
+          "value": "db_name",
+          "refName": "testcm"
+        }
+      ],
+      "envsFrom": [
+        {
+          "name": "testcm",
+          "refType": "configMap",
+          "prefix": "selfdefined_"
         }
       ],
       "startupProbe": {
