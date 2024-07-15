@@ -31,6 +31,7 @@ func (s *SecretApiHandler) Registry(router gin.IRouter) {
 	v1.GET("", s.GetSecrets)
 	v1.GET("/detail", s.GetSecretDetail)
 	v1.POST("", s.CreateOrUpdateSecret)
+	v1.DELETE("", s.DeleteSecret)
 
 }
 
@@ -100,4 +101,27 @@ func (s *SecretApiHandler) CreateOrUpdateSecret(c *gin.Context) {
 		return
 	}
 	response.Success(c, msg, k8sSecret)
+}
+
+// @Summary      delete a secret
+// @Description	 delete a secret
+// @Tags         secret
+// @Accept       json
+// @Produce      json
+// @Param namespace query string true "the namespace of the secret to be deleted"
+// @Param name query string true "the name of the secret to be deleted"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /secrets [delete]
+func (s *SecretApiHandler) DeleteSecret(c *gin.Context) {
+	ns := c.Query("namespace")
+	name := c.Query("name")
+
+	err := s.svc.DeleteSecret(c.Request.Context(), ns, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "delete secret success", ns)
 }
