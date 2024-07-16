@@ -31,16 +31,20 @@ func NewPersistentVolumeRes() *PersistentVolumeRes {
 }
 
 type PersistentVolumeReq struct {
-	*Base
-	*VolumeSource
+	Name          string                               `json:"name"`
+	Labels        []*util.ListItem                     `json:"labels"`
+	Capacity      int32                                `json:"capacity"`
+	AccessModes   []corev1.PersistentVolumeAccessMode  `json:"accessModes"`
+	ReClaimPolicy corev1.PersistentVolumeReclaimPolicy `json:"reClaimPolicy"`
+	VolumeSource  *VolumeSource                        `json:"volumeSource"`
 }
 
 func NewPersistentVolumeReq() *PersistentVolumeReq {
 	return &PersistentVolumeReq{
-		Base: &Base{
-			Labels:      make([]*util.ListItem, 0),
-			AccessModes: make([]corev1.PersistentVolumeAccessMode, 0),
-		},
+
+		Labels:      make([]*util.ListItem, 0),
+		AccessModes: make([]corev1.PersistentVolumeAccessMode, 0),
+
 		VolumeSource: &VolumeSource{
 			NfsVolumeSource: &NfsVolumeSource{},
 		},
@@ -48,8 +52,8 @@ func NewPersistentVolumeReq() *PersistentVolumeReq {
 }
 
 type VolumeSource struct {
-	Type string `json:"type"`
-	*NfsVolumeSource
+	Type            string           `json:"type"`
+	NfsVolumeSource *NfsVolumeSource `json:"nfsVolumeSource"`
 }
 
 type NfsVolumeSource struct {

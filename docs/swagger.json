@@ -59,7 +59,7 @@
                 }
             },
             "post": {
-                "description": "create/update a config map. the configurations of the configmap should be specified in the request\nbody. \n\nan example of request body:\n\n\n```json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"cm\",\n      \"value\": \"test\"\n    },\n    {\n      \"key\": \"cm2\",\n      \"value\": \"test2\"\n    }\n  ],\n  \"data\": [\n    {\n      \"key\": \"testKey\",\n      \"value\": \"testValue\"\n    }\n  ]\n}\n```",
+                "description": "create/update a config map. the configurations of the configmap should be specified in the request\nbody. \n\nan example of request body:\n\n\n```json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"cm\",\n      \"value\": \"test\"\n    },\n    {\n      \"key\": \"cm2\",\n      \"value\": \"test2\"\n    }\n  ],\n  \"data\": [\n    {\n      \"key\": \"testKey\",\n      \"value\": \"testValue\"\n    },\n    {\n      \"key\": \"db_name\",\n      \"value\": \"testdb\"\n    },\n    {\n      \"key\": \"db_host\",\n      \"value\": \"127.0.0.1\"\n    }\n  ]\n}\n```",
                 "consumes": [
                     "application/json"
                 ],
@@ -461,7 +461,7 @@
                 }
             },
             "post": {
-                "description": "creates a new Kubernetes pod with detailed configurations, configuring scheduling is also supported.\n\ntwo types of scheduling are supported: \n1. node name\n2. affinity\n\nan example of pod config:\n\n```json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"nodeScheduling\": {\n    \"type\": \"nodeAffinity\",\n    \"nodeAffinity\": [\n      {\n        \"key\": \"test\",\n        \"value\": \"app\",\n        \"operator\": \"In\"\n\n      }\n    ]\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\": \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n```",
+                "description": "creates a new Kubernetes pod with detailed configurations, configuring scheduling is also supported.\n\ntwo types of scheduling are supported: \n1. node name\n2. affinity\n\nan example of pod config:\n\n```json\n{\n  \"base\": {\n    \"name\": \"test\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"test\"\n      }\n    ],\n    \"restartPolicy\": \"Always\"\n  },\n  \"nodeScheduling\": {\n    \"type\": \"nodeAffinity\",\n    \"nodeAffinity\": [\n      {\n        \"key\": \"test\",\n        \"value\": \"app\",\n        \"operator\": \"In\"\n\n      }\n    ]\n  },\n  \"volumes\": [\n    {\n      \"name\": \"cache-volume\",\n      \"type\": \"emptyDir\"\n    }\n  ],\n  \"netWorking\": {\n    \"hostNetwork\": true,\n    \"hostName\": \"test\",\n    \"dnsPolicy\": \"Default\",\n    \"dnsConfig\": {\n      \"nameservers\": [\n        \"8.8.8.8\"\n      ]\n    },\n    \"hostAliases\": [\n      {\n        \"key\": \"64.23.172.139\",\n        \"value\": \"foo.bar,foo2.bar\"\n      }\n    ]\n  },\n  \"initContainers\": [\n    {\n      \"name\": \"busybox\",\n      \"image\": \"busybox\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"command\": [\n        \"echo\"\n      ],\n      \"args\": [\n        \"hello world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\": \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n      \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n      \"envs\": [\n        {\n          \"name\": \"foo\",\n          \"value\": \"bar\"\n        },\n        {\n          \"name\": \"new_db_name\",\n          \"type\": \"configMap\",\n          \"value\": \"db_name\",\n          \"refName\": \"testcm\"\n        }\n      ],\n      \"envsFrom\": [\n        {\n          \"name\": \"testcm\",\n          \"refType\": \"configMap\",\n          \"prefix\": \"selfdefined_\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\": true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\": \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\": 80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n              \"value\": \"bar\"\n            }\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"livenessProbe\": {\n        \"enable\": true,\n        \"type\": \"tcp\",\n        \"tcpSocket\": {\n          \"host\": \"\",\n          \"port\": 80\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"readinessProbe\": {\n        \"enable\": true,\n        \"type\": \"exec\",\n        \"exec\": {\n          \"command\": [\n            \"echo\",\n            \"helloworld\"\n          ]\n        },\n        \"initialDelaySeconds\": 10,\n        \"periodSeconds\": 5,\n        \"timeoutSeconds\": 10,\n        \"successThreshold\": 1,\n        \"failureThreshold\": 10\n      },\n      \"resources\": {\n        \"enable\": true,\n        \"memRequest\": 128,\n        \"memLimit\": 128,\n        \"cpuRequest\": 100,\n        \"cpuLimit\": 100\n      },\n      \"volumeMounts\": [\n        {\n          \"mountName\": \"cache-volume\",\n          \"mountPath\": \"/test\",\n          \"readyOnly\": false\n        }\n      ]\n    }\n  ]\n}\n```",
                 "consumes": [
                     "application/json"
                 ],
@@ -722,6 +722,135 @@
                         "description": "Filter pods by nodename",
                         "name": "nodename",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pv": {
+            "get": {
+                "description": "get persistent volume list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "get persistent volume list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the volume list based on the keyword, not required",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create a persistent volume, the request body should specify the detailed configs of \nthe persistent volume.\n\n\nan example:\n\n\n```json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"pv\",\n      \"value\": \"test-pv\"\n    }\n  ],\n  \"capacity\": 100,\n  \"accessModes\": [\n    \"ReadWriteOnce\"\n  ],\n  \"reClaimPolicy\": \"Recycle\",\n  \"volumeSource\": {\n    \"type\": \"nfs\",\n    \"nfsVolumeSource\": {\n      \"nfsPath\": \"\",\n      \"nfsServer\": \"\",\n      \"nfsReadyOnly\": false\n    }\n  }\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "create persistent volume",
+                "parameters": [
+                    {
+                        "description": "The configs of the persistent volume",
+                        "name": "PersistentVolume",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete persistent volume list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "delete persistent volume",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Delete the volume list based on the name, required",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
