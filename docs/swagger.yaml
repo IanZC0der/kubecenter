@@ -88,7 +88,9 @@ paths:
         \ \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n
         \     \"key\": \"cm\",\n      \"value\": \"test\"\n    },\n    {\n      \"key\":
         \"cm2\",\n      \"value\": \"test2\"\n    }\n  ],\n  \"data\": [\n    {\n
-        \     \"key\": \"testKey\",\n      \"value\": \"testValue\"\n    }\n  ]\n}\n```"
+        \     \"key\": \"testKey\",\n      \"value\": \"testValue\"\n    },\n    {\n
+        \     \"key\": \"db_name\",\n      \"value\": \"testdb\"\n    },\n    {\n
+        \     \"key\": \"db_host\",\n      \"value\": \"127.0.0.1\"\n    }\n  ]\n}\n```"
       parameters:
       - description: the configs of the config map
         in: body
@@ -374,8 +376,12 @@ paths:
         world\"\n      ]\n    }\n  ],\n  \"containers\": [\n    {\n      \"name\":
         \"nginx\",\n      \"image\": \"nginx\",\n      \"imagePullPolicy\": \"IfNotPresent\",\n
         \     \"privileged\": true,\n      \"tty\": true,\n      \"workingDir\": \"/test\",\n
-        \     \"envs\": [\n        {\n          \"key\": \"foo\",\n          \"value\":
-        \"bar\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\":
+        \     \"envs\": [\n        {\n          \"name\": \"foo\",\n          \"value\":
+        \"bar\"\n        },\n        {\n          \"name\": \"new_db_name\",\n          \"type\":
+        \"configMap\",\n          \"value\": \"db_name\",\n          \"refName\":
+        \"testcm\"\n        }\n      ],\n      \"envsFrom\": [\n        {\n          \"name\":
+        \"testcm\",\n          \"refType\": \"configMap\",\n          \"prefix\":
+        \"selfdefined_\"\n        }\n      ],\n      \"startupProbe\": {\n        \"enable\":
         true,\n        \"type\": \"http\",\n        \"httpGet\": {\n          \"scheme\":
         \"HTTP\",\n          \"host\": \"\",\n          \"path\": \"/\",\n          \"port\":
         80,\n          \"httpHeaders\": [\n            {\n              \"key\": \"foo\",\n
@@ -707,6 +713,98 @@ paths:
       summary: get a pod detail
       tags:
       - pods
+  /pv:
+    delete:
+      consumes:
+      - application/json
+      description: delete persistent volume list
+      parameters:
+      - description: Delete the volume list based on the name, required
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete persistent volume
+      tags:
+      - persistent volume
+    get:
+      consumes:
+      - application/json
+      description: get persistent volume list
+      parameters:
+      - description: Retrieve the volume list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get persistent volume list
+      tags:
+      - persistent volume
+    post:
+      consumes:
+      - application/json
+      description: "create a persistent volume, the request body should specify the
+        detailed configs of \nthe persistent volume.\n\n\nan example:\n\n\n```json\n{\n
+        \ \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n
+        \     \"key\": \"pv\",\n      \"value\": \"test-pv\"\n    }\n  ],\n  \"capacity\":
+        100,\n  \"accessModes\": [\n    \"ReadWriteOnce\"\n  ],\n  \"reClaimPolicy\":
+        \"Recycle\",\n  \"volumeSource\": {\n    \"type\": \"nfs\",\n    \"nfsVolumeSource\":
+        {\n      \"nfsPath\": \"\",\n      \"nfsServer\": \"\",\n      \"nfsReadyOnly\":
+        false\n    }\n  }\n}\n```"
+      parameters:
+      - description: The configs of the persistent volume
+        in: body
+        name: PersistentVolume
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create persistent volume
+      tags:
+      - persistent volume
   /secrets:
     delete:
       consumes:

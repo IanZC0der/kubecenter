@@ -59,13 +59,14 @@ func (p *PersistentVolumeServiceImpl) DeletePV(ctx context.Context, name string)
 func (p *PersistentVolumeServiceImpl) CreatePV(ctx context.Context, req *persistentvolume.PersistentVolumeReq) (*corev1.PersistentVolume, error) {
 	var volumeSource corev1.PersistentVolumeSource
 	//nfs source only
-	if req.Type != NFS_VOLUMESOURCE_TYPE {
-		return nil, fmt.Errorf("invalid volume type: %s", req.Type)
+	//fmt.Printf(req)
+	if req.VolumeSource.Type != NFS_VOLUMESOURCE_TYPE {
+		return nil, fmt.Errorf("invalid volume type: %s", req.VolumeSource.Type)
 	} else {
 		volumeSource.NFS = &corev1.NFSVolumeSource{
-			Server:   req.NfsServer,
-			Path:     req.NfsPath,
-			ReadOnly: req.NfsReadOnly,
+			Server:   req.VolumeSource.NfsVolumeSource.NfsServer,
+			Path:     req.VolumeSource.NfsVolumeSource.NfsPath,
+			ReadOnly: req.VolumeSource.NfsVolumeSource.NfsReadOnly,
 		}
 	}
 
