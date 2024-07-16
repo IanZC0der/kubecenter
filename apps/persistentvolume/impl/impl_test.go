@@ -39,3 +39,11 @@ func TestPersistentVolumeServiceImpl_GetPVList(t *testing.T) {
 	}
 	t.Log(l)
 }
+
+func TestPersistentVolumeServiceImpl_GetPVCList(t *testing.T) {
+	l, err := pvSvc.GetPVCList(ctx, "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(l)
+}

@@ -833,7 +833,7 @@
                 }
             },
             "delete": {
-                "description": "delete persistent volume list",
+                "description": "delete persistent volume",
                 "consumes": [
                     "application/json"
                 ],
@@ -847,7 +847,149 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Delete the volume list based on the name, required",
+                        "description": "Delete the volume based on the name, required",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pv/pvc": {
+            "get": {
+                "description": "get persistent volume claim list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "get persistent volume claim list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the volume claim list based on the namespace, not required",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the volume claim list based on the name, not required",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create a persistent volume claim, the request body should specify the detailed configs of \nthe persistent volume claim. the requested capacity should be more than the target persistent volume capacity\n\n\nan example:\n\n\n```json\n{\n  \"name\": \"test\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"pvc\",\n      \"value\": \"pvc01\"\n    }\n  ],\n  \"selector\": [\n    {\n      \"key\": \"pv\",\n      \"value\": \"test-pv\"\n    }\n  ],\n  \"accessModes\": [\n    \"ReadWriteOnce\"\n  ],\n  \"capacity\": 100\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "create persistent volume claim",
+                "parameters": [
+                    {
+                        "description": "The configs of the persistent volume claim",
+                        "name": "PersistentVolumeClaim",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete persistent volume claim",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "delete persistent volume claim",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Delete the volume claim based on the namespace, required",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delete the volume claim based on the name, required",
                         "name": "name",
                         "in": "query",
                         "required": true

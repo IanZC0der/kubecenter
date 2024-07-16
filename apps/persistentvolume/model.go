@@ -61,3 +61,20 @@ type NfsVolumeSource struct {
 	NfsServer   string `json:"nfsServer"`
 	NfsReadOnly bool   `json:"nfsReadOnly"`
 }
+
+type PersistentVolumeClaim struct {
+	Name             string                              `json:"name"`
+	Namespace        string                              `json:"namespace"`
+	Labels           []*util.ListItem                    `json:"labels"`
+	AccessModes      []corev1.PersistentVolumeAccessMode `json:"accessModes"`
+	Capacity         int32                               `json:"capacity"`
+	Selector         []*util.ListItem                    `json:"selector"`
+	StorageClassName string                              `json:"storageClassName"`
+}
+
+func NewCreatePersistentVolumeClaimReq() *PersistentVolumeClaim {
+	return &PersistentVolumeClaim{
+		Labels:   make([]*util.ListItem, 0),
+		Selector: make([]*util.ListItem, 0),
+	}
+}
