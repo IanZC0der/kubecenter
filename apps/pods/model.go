@@ -62,10 +62,55 @@ func NewBase() *Base {
 	}
 }
 
+type ConfigMapRefVolume struct {
+	Name     string `json:"name"`
+	Optional bool   `json:"optional"`
+}
+
+type SecretRefVolume struct {
+	Name     string `json:"name"`
+	Optional bool   `json:"optional"`
+}
+
+type HostPathVolume struct {
+	Type corev1.HostPathType `json:"type"`
+	Path string              `json:"path"`
+}
+
+type DownwardAPIVolumeItem struct {
+	Path         string `json:"path"`
+	FieldRefPath string `json:"fieldRefPath"`
+}
+
+type DownwardAPIVolume struct {
+	Items []*DownwardAPIVolumeItem `json:"items"`
+}
+
+type PVCVolume struct {
+	Name string `json:"name"`
+}
+
+func NewVolume() *Volume {
+	return &Volume{
+		ConfigMapRefVolume: &ConfigMapRefVolume{},
+		SecretRefVolume:    &SecretRefVolume{},
+		HostPathVolume:     &HostPathVolume{},
+		DownwardAPIVolume: &DownwardAPIVolume{
+			Items: make([]*DownwardAPIVolumeItem, 0),
+		},
+		PVCVolume: &PVCVolume{},
+	}
+}
+
 type Volume struct {
 	Name string `json:"name"`
 	//emptyDir | configMap | secret | hostPath | downward | pvc
-	Type string `json:"type"`
+	Type               string              `json:"type"`
+	ConfigMapRefVolume *ConfigMapRefVolume `json:"configMapRefVolume"`
+	SecretRefVolume    *SecretRefVolume    `json:"secretRefVolume"`
+	HostPathVolume     *HostPathVolume     `json:"hostPathVolume"`
+	DownwardAPIVolume  *DownwardAPIVolume  `json:"downwardAPIVolume"`
+	PVCVolume          *PVCVolume          `json:"PVCVolume"`
 }
 
 type DnsConfig struct {
