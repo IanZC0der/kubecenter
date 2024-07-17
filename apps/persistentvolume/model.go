@@ -3,6 +3,7 @@ package persistentvolume
 import (
 	"github.com/IanZC0der/kubecenter/util"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 )
 
 type Base struct {
@@ -76,5 +77,23 @@ func NewCreatePersistentVolumeClaimReq() *PersistentVolumeClaim {
 	return &PersistentVolumeClaim{
 		Labels:   make([]*util.ListItem, 0),
 		Selector: make([]*util.ListItem, 0),
+	}
+}
+
+type StorageClass struct {
+	Name                 string                               `json:"name"`
+	Labels               []*util.ListItem                     `json:"labels"`
+	Provisioner          string                               `json:"provisioner"`
+	MountOptions         []string                             `json:"mountOptions"`
+	Parameters           []*util.ListItem                     `json:"parameters"`
+	ReclaimPolicy        corev1.PersistentVolumeReclaimPolicy `json:"reclaimPolicy"`
+	AllowVolumeExpansion bool                                 `json:"allowVolumeExpansion"`
+	VolumeBindingMode    storagev1.VolumeBindingMode          `json:"volumeBindingMode"`
+}
+
+func NewStorageClass() *StorageClass {
+	return &StorageClass{
+		Labels:     make([]*util.ListItem, 0),
+		Parameters: make([]*util.ListItem, 0),
 	}
 }

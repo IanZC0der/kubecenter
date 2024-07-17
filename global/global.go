@@ -17,7 +17,8 @@ func C() *conf.Config {
 
 func Init() *conf.Config {
 	c := &conf.Config{
-		App: &conf.App{},
+		App:    &conf.App{},
+		System: &conf.System{},
 	}
 	return c
 }

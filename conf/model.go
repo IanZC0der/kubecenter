@@ -13,10 +13,15 @@ type App struct {
 	HttpPort int64  `json:"http_port" yaml:"http_port" env:"HTTP_PORT"`
 }
 
+type System struct {
+	Provisioner string `json:"provisioner" yaml:"provisioner" env:"PROVISIONER"`
+}
+
 type Config struct {
 	//MySQL *MySQL `json:"mysql"`
 
-	App *App `json:"app" yaml:"app"`
+	App    *App    `json:"app" yaml:"app"`
+	System *System `json:"system" yaml:"system"`
 }
 
 func (a *App) HttpAddress() string {

@@ -905,6 +905,98 @@ paths:
       summary: create persistent volume claim
       tags:
       - persistent volume
+  /pv/sc:
+    delete:
+      consumes:
+      - application/json
+      description: delete a storage class
+      parameters:
+      - description: Delete the storage class based on the name, required
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete a storage class
+      tags:
+      - persistent volume
+    get:
+      consumes:
+      - application/json
+      description: get storage class list
+      parameters:
+      - description: Retrieve the storage class list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get storage class list
+      tags:
+      - persistent volume
+    post:
+      consumes:
+      - application/json
+      description: "create a storage class, the request body should specify the detailed
+        configs of\nthe storage class to be created. note that this project use nfs
+        as the default provisioner. \nnfs supports two types of reclaim policy: Retain
+        and Delete\n\n\nan example:\n\n```json\n{\n  \"name\": \"test\",\n  \"labels\":
+        [],\n  \"provisioner\": \"cluster.local/nfs-subdir-external-provisioner\",\n
+        \ \"mountOptions\": [\"nfsvers=4\"],\n  \"volumeBindingMode\": \"Immediate\",\n
+        \ \"reclaimPolicy\": \"Delete\",\n  \"allowVolumeExpansion\": false,\n  \"parameters\":
+        []\n}\n```"
+      parameters:
+      - description: The configs of the storage class to be created
+        in: body
+        name: StorageClass
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create storage class
+      tags:
+      - persistent volume
   /secrets:
     delete:
       consumes:

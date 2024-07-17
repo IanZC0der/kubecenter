@@ -33,6 +33,9 @@ func (p *PersistentVolumeApiHandler) Registry(router gin.IRouter) {
 	v1.GET("/pvc", p.GetPVCList)
 	v1.POST("/pvc", p.CreatePVC)
 	v1.DELETE("/pvc", p.DeletePVC)
+	v1.GET("/sc", p.GetSCList)
+	v1.POST("/sc", p.CreateSC)
+	v1.DELETE("/sc", p.DeleteSC)
 }
 
 // @Summary      get persistent volume list
@@ -169,4 +172,70 @@ func (p *PersistentVolumeApiHandler) DeletePVC(ctx *gin.Context) {
 		return
 	}
 	response.Success(ctx, "delete persistent volume claim", name)
+}
+
+// @Summary      get storage class list
+// @Description	 get storage class list
+// @Tags         persistent volume
+// @Accept       json
+// @Produce      json
+// @Param keyword query string false "Retrieve the storage class list based on the keyword, not required"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pv/sc [get]
+func (p *PersistentVolumeApiHandler) GetSCList(ctx *gin.Context) {
+	keyword := ctx.Query("keyword")
+
+	res, err := p.svc.GetSCList(ctx.Request.Context(), keyword)
+	if err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	response.Success(ctx, "get storage class list", res)
+}
+
+// @Summary     	create storage class
+// @Description.markdown createsc
+// @Tags         persistent volume
+// @Accept       json
+// @Produce      json
+// @Param StorageClass body object true "The configs of the storage class to be created"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pv/sc [post]
+func (p *PersistentVolumeApiHandler) CreateSC(ctx *gin.Context) {
+	req := persistentvolume.NewStorageClass()
+	if err := ctx.ShouldBind(req); err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	res, err := p.svc.CreateSC(ctx.Request.Context(), req)
+	if err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	response.Success(ctx, "create storage class success", res)
+}
+
+// @Summary      delete a storage class
+// @Description	 delete a storage class
+// @Tags         persistent volume
+// @Accept       json
+// @Produce      json
+// @Param name query string true "Delete the storage class based on the name, required"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /pv/sc [delete]
+func (p *PersistentVolumeApiHandler) DeleteSC(ctx *gin.Context) {
+	name := ctx.Query("name")
+
+	err := p.svc.DeleteSC(ctx.Request.Context(), name)
+	if err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	response.Success(ctx, "delete storage class success", name)
 }
