@@ -1017,6 +1017,135 @@
                 }
             }
         },
+        "/pv/sc": {
+            "get": {
+                "description": "get storage class list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "get storage class list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the storage class list based on the keyword, not required",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create a storage class, the request body should specify the detailed configs of\nthe storage class to be created. note that this project use nfs as the default provisioner. \nnfs supports two types of reclaim policy: Retain and Delete\n\n\nan example:\n\n```json\n{\n  \"name\": \"test\",\n  \"labels\": [],\n  \"provisioner\": \"cluster.local/nfs-subdir-external-provisioner\",\n  \"mountOptions\": [\"nfsvers=4\"],\n  \"volumeBindingMode\": \"Immediate\",\n  \"reclaimPolicy\": \"Delete\",\n  \"allowVolumeExpansion\": false,\n  \"parameters\": []\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "create storage class",
+                "parameters": [
+                    {
+                        "description": "The configs of the storage class to be created",
+                        "name": "StorageClass",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete a storage class",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "persistent volume"
+                ],
+                "summary": "delete a storage class",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Delete the storage class based on the name, required",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "description": "get secret list",

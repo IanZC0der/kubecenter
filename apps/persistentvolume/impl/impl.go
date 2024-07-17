@@ -8,6 +8,7 @@ import (
 	"github.com/IanZC0der/kubecenter/ioc"
 	"github.com/IanZC0der/kubecenter/util"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
@@ -137,6 +138,58 @@ func (p *PersistentVolumeServiceImpl) CreatePVC(ctx context.Context, req *persis
 		pvc.Spec.Selector = nil
 	}
 	res, err := global.KubeConfigSet.CoreV1().PersistentVolumeClaims(req.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (p *PersistentVolumeServiceImpl) GetSCList(ctx context.Context, keyword string) ([]*storagev1.StorageClass, error) {
+	scList, err := global.KubeConfigSet.StorageV1().StorageClasses().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*storagev1.StorageClass, 0)
+
+	for _, item := range scList.Items {
+		if !strings.Contains(item.Name, keyword) {
+			continue
+		}
+		res = append(res, &item)
+	}
+	return res, nil
+}
+func (p *PersistentVolumeServiceImpl) DeleteSC(ctx context.Context, name string) error {
+	return global.KubeConfigSet.StorageV1().StorageClasses().Delete(ctx, name, metav1.DeleteOptions{})
+}
+
+func (p *PersistentVolumeServiceImpl) CreateSC(ctx context.Context, req *persistentvolume.StorageClass) (*storagev1.StorageClass, error) {
+	// support nfs only, but can be extended in the config
+	supportedProvisioners := strings.Split(global.CONF.System.Provisioner, ",")
+	var ifNfs bool
+	for _, val := range supportedProvisioners {
+		if req.Provisioner == val {
+			ifNfs = true
+			break
+		}
+	}
+	if ifNfs == false {
+		return nil, fmt.Errorf("invalid provisioner: %s", req.Provisioner)
+	}
+
+	sc := &storagev1.StorageClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   req.Name,
+			Labels: util.MapConverter(req.Labels),
+		},
+		Provisioner:          req.Provisioner,
+		MountOptions:         req.MountOptions,
+		VolumeBindingMode:    &req.VolumeBindingMode,
+		ReclaimPolicy:        &req.ReclaimPolicy,
+		AllowVolumeExpansion: &req.AllowVolumeExpansion,
+		Parameters:           util.MapConverter(req.Parameters),
+	}
+	res, err := global.KubeConfigSet.StorageV1().StorageClasses().Create(ctx, sc, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
