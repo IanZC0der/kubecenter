@@ -18,6 +18,11 @@ const (
 	IMAGE_PULL_POLICY_IFNOTPRESENT = "IfNotPresent"
 	RESTART_POLICY_ALWAYS          = "Always"
 	VOLUME_TYPE_EMPTYDIR           = "emptyDir"
+	VOLUME_TYPE_CONFIGMAP          = "configMap"
+	VOLUME_TYPE_SECRET             = "secret"
+	VOLUME_TYPE_HOSTPATH           = "hostPath"
+	VOLUME_TYPE_DOWNWARD           = "downwardAPI"
+	VOLUME_TYPE_PVC                = "pvc"
 	PROBE_HTTP                     = "http"
 	PROBE_TCP                      = "tcp"
 	PROBE_EXEC                     = "exec"
@@ -113,25 +118,79 @@ func getSchedulingFromK8SPod(pod *corev1.Pod) *NodeScheduling {
 	return s
 }
 
+func GetPodVolumesFromPod(vlms []corev1.Volume) []*Volume {
+	volumeList := make([]*Volume, 0)
+	if volumeMap == nil {
+		volumeMap = make(map[string]string)
+	}
+	for _, vlm := range vlms {
+		res := NewVolume()
+		if vlm.EmptyDir != nil {
+			res.Type = VOLUME_TYPE_EMPTYDIR
+			res.Name = vlm.Name
+		}
+
+		if vlm.ConfigMap != nil {
+			var optional bool
+			if vlm.ConfigMap.Optional != nil {
+				optional = *vlm.ConfigMap.Optional
+			}
+			res.Type = VOLUME_TYPE_CONFIGMAP
+			res.Name = vlm.ConfigMap.Name
+			res.ConfigMapRefVolume.Name = vlm.ConfigMap.Name
+			res.ConfigMapRefVolume.Optional = optional
+		}
+
+		if vlm.Secret != nil {
+			var optional bool
+			if vlm.Secret.Optional != nil {
+				optional = *vlm.Secret.Optional
+			}
+			res.Type = VOLUME_TYPE_SECRET
+			res.Name = vlm.Name
+			res.SecretRefVolume.Name = vlm.Secret.SecretName
+			res.SecretRefVolume.Optional = optional
+		}
+		if vlm.HostPath != nil {
+			res.Type = VOLUME_TYPE_HOSTPATH
+			res.Name = vlm.Name
+			res.HostPathVolume.Path = vlm.HostPath.Path
+			res.HostPathVolume.Type = *vlm.HostPath.Type
+		}
+
+		if vlm.PersistentVolumeClaim != nil {
+			res.Type = VOLUME_TYPE_PVC
+			res.Name = vlm.Name
+			res.PVCVolume.Name = vlm.PersistentVolumeClaim.ClaimName
+		}
+
+		if vlm.DownwardAPI != nil {
+			//items := make([]pod_req.DownwardAPIVolumeItem, 0)
+			for _, item := range vlm.DownwardAPI.Items {
+				res.DownwardAPIVolume.Items = append(res.DownwardAPIVolume.Items, &DownwardAPIVolumeItem{
+					Path:         item.Path,
+					FieldRefPath: item.FieldRef.FieldPath,
+				})
+			}
+			res.Type = VOLUME_TYPE_DOWNWARD
+			res.Name = vlm.Name
+		}
+		if res.Name == "" && res.Type == "" {
+			continue
+		}
+		volumeMap[vlm.Name] = ""
+		volumeList = append(volumeList, res)
+	}
+	return volumeList
+}
+
 func GetPodInfoFromPod(pod *corev1.Pod) *Pod {
 	newPod := NewPod()
 	newPod.Base = GetBaseFromPod(pod)
 	newPod.Tolerations = GetTolerationsFromPod(pod)
 	newPod.NetWorking = GetNetworkingFromPod(pod)
 	newPod.NodeScheduling = getSchedulingFromK8SPod(pod)
-	for _, volume := range pod.Spec.Volumes {
-		if volume.EmptyDir == nil {
-			continue
-		}
-		if volumeMap == nil {
-			volumeMap = make(map[string]string)
-		}
-		volumeMap[volume.Name] = ""
-		newPod.Volumes = append(newPod.Volumes, &Volume{
-			Type: VOLUME_TYPE_EMPTYDIR,
-			Name: volume.Name,
-		})
-	}
+	newPod.Volumes = GetPodVolumesFromPod(pod.Spec.Volumes)
 	//initcontainers
 	for _, ctner := range pod.Spec.Containers {
 		newPod.Containers = append(newPod.Containers, GetContainerFromPod(&ctner))
@@ -539,13 +598,62 @@ func GetK8SResources(rscs *Resources) corev1.ResourceRequirements {
 
 func GetK8SPodVolumes(vlms []*Volume) []corev1.Volume {
 	podk8svlms := make([]corev1.Volume, 0)
+	source := corev1.VolumeSource{}
 	for _, item := range vlms {
-		if item.Type != VOLUME_TYPE_EMPTYDIR {
+		switch item.Type {
+		case VOLUME_TYPE_EMPTYDIR:
+			source = corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			}
+		case VOLUME_TYPE_HOSTPATH:
+			source = corev1.VolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Type: &item.HostPathVolume.Type,
+					Path: item.HostPathVolume.Path,
+				},
+			}
+		case VOLUME_TYPE_CONFIGMAP:
+			source = corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: item.ConfigMapRefVolume.Name,
+					},
+					Optional: &item.ConfigMapRefVolume.Optional,
+				},
+			}
+		case VOLUME_TYPE_SECRET:
+			source = corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: item.SecretRefVolume.Name,
+					Optional:   &item.SecretRefVolume.Optional,
+				},
+			}
+		case VOLUME_TYPE_DOWNWARD:
+			items := make([]corev1.DownwardAPIVolumeFile, 0)
+			for _, i := range item.DownwardAPIVolume.Items {
+				items = append(items, corev1.DownwardAPIVolumeFile{
+					//容器内的文件访问路径
+					Path: i.Path,
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: i.FieldRefPath,
+					},
+				})
+			}
+			source = corev1.VolumeSource{
+				DownwardAPI: &corev1.DownwardAPIVolumeSource{
+					Items: items,
+				},
+			}
+		case VOLUME_TYPE_PVC:
+			source = corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: item.PVCVolume.Name,
+				},
+			}
+		default:
 			continue
 		}
-		source := corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{},
-		}
+
 		podk8svlms = append(podk8svlms, corev1.Volume{
 			VolumeSource: source,
 			Name:         item.Name,
