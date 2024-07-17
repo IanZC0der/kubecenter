@@ -64,6 +64,7 @@ func NewBase() *Base {
 
 type Volume struct {
 	Name string `json:"name"`
+	//emptyDir | configMap | secret | hostPath | downward | pvc
 	Type string `json:"type"`
 }
 
