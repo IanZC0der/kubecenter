@@ -150,6 +150,141 @@ paths:
       summary: get configmap detail
       tags:
       - configmap
+  /k8sservice:
+    delete:
+      consumes:
+      - application/json
+      description: delete service
+      parameters:
+      - description: Delete the service based on the namespace, required
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Delete the service based on the name, required
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete service
+      tags:
+      - service
+    get:
+      consumes:
+      - application/json
+      description: get service list
+      parameters:
+      - description: Retrieve the service list based on the namespace, not required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the service list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get service list
+      tags:
+      - service
+    post:
+      consumes:
+      - application/json
+      description: "create/update a k8s service. the request body should specify the
+        detailed configs of \nthe service to be created/updated. labels of the pod
+        should be specified in the selector\n\nan example:\n\n```json\n\n{\n  \"name\":
+        \"test-svc\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\":
+        \"test\",\n      \"value\": \"svc\"\n    }\n  ],\n  \"selector\": [\n    {\n
+        \     \"key\": \"app\",\n      \"value\": \"test\"\n    }\n  ],\n  \"ports\":
+        [\n    {\n      \"name\": \"http\",\n      \"targetPort\": 80,\n      \"port\":
+        80,\n      \"nodePort\": 0\n    }\n  ]\n}\n```"
+      parameters:
+      - description: The configs of the service to be created/updated
+        in: body
+        name: Service
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create/update service
+      tags:
+      - service
+  /k8sservice/detail:
+    get:
+      consumes:
+      - application/json
+      description: get service detail
+      parameters:
+      - description: Retrieve the service info based on the namespace, required
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Retrieve the service info based on the name, required
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get service detail
+      tags:
+      - service
   /nodes:
     get:
       consumes:

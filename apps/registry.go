@@ -3,6 +3,8 @@ package apps
 import (
 	_ "github.com/IanZC0der/kubecenter/apps/configmap/api"
 	_ "github.com/IanZC0der/kubecenter/apps/configmap/impl"
+	_ "github.com/IanZC0der/kubecenter/apps/k8sservice/api"
+	_ "github.com/IanZC0der/kubecenter/apps/k8sservice/impl"
 	_ "github.com/IanZC0der/kubecenter/apps/nodes/api"
 	_ "github.com/IanZC0der/kubecenter/apps/nodes/impl"
 	_ "github.com/IanZC0der/kubecenter/apps/persistentvolume/api"
