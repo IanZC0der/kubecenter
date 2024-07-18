@@ -42,7 +42,7 @@ func TestWorkloadServiceImpl_GetStatefulSetList(t *testing.T) {
 }
 
 func TestWorkloadServiceImpl_GetDeploymentList(t *testing.T) {
-	res, err := workloadSvc.GetStatefulSetDetail(ctx, "", "")
+	res, err := workloadSvc.GetStatefulSetDetail(ctx, "test", "nginx-statefulset")
 	if err != nil {
 		t.Fatal(err)
 	}

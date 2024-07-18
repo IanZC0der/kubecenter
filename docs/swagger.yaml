@@ -1285,4 +1285,164 @@ paths:
       summary: get secret detail
       tags:
       - secret
+  /workload/statefulset:
+    delete:
+      consumes:
+      - application/json
+      description: delete a statefulSet
+      parameters:
+      - description: the namespace of the statefulSet to be deleted
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of the statefulSet to be deleted
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete a statefulSet
+      tags:
+      - workload
+    get:
+      consumes:
+      - application/json
+      description: get statefulSet list
+      parameters:
+      - description: Retrieve the statefulSet list based on the namespace, not required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the statefulSet list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get statefulSet list
+      tags:
+      - workload
+    post:
+      consumes:
+      - application/json
+      description: "create/update a statefulSet. the configs of the statefulSet should
+        be specified \nin the request body. use the createService api to create a
+        service first.\n\nan example:\n```json\n\n{\n    \"name\": \"nginx-statefulset\",\n
+        \   \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\":
+        \"app\",\n        \"value\": \"nginx-statefulset\"\n      }\n    ],\n    \"selector\":
+        [\n      {\n        \"key\": \"app\",\n        \"value\": \"nginx-statefulset-tp\"\n
+        \     }\n    ],\n    \"replicas\": 2,\n    \"volumeClaimTemplates\": [\n      {\n
+        \       \"name\": \"www\",\n        \"labels\": [\n          {\n            \"key\":
+        \"pvc\",\n            \"value\": \"pvc01\"\n          }\n        ],\n        \"accessModes\":
+        [\n          \"ReadWriteOnce\"\n        ],\n        \"capacity\": 100,\n        \"storageClassName\":
+        \"nfs-client\"\n      }\n    ],\n  \"template\": {\n    \"netWorking\": {\n
+        \     \"hostNetwork\": true,\n      \"hostName\": \"test\",\n      \"dnsPolicy\":
+        \"Default\",\n      \"dnsConfig\": {\n        \"nameservers\": [\n          \"8.8.8.8\"\n
+        \       ]\n      },\n      \"hostAliases\": [\n        {\n          \"key\":
+        \"64.23.172.139\",\n          \"value\": \"foo.bar,foo2.bar\"\n        }\n
+        \     ]\n    },\n    \"base\": {\n      \"labels\": [\n        {\n          \"key\":
+        \"app\",\n          \"value\": \"nginx-statefulset-tp\"\n        }\n      ],\n
+        \     \"restartPolicy\": \"Always\"\n    },\n    \"initContainers\": [\n      {\n
+        \       \"name\": \"busybox-init\",\n        \"image\": \"busybox\",\n        \"imagePullPolicy\":
+        \"IfNotPresent\",\n        \"command\": [\n          \"echo\"\n        ],\n
+        \       \"args\": [\n          \"hello world\"\n        ]\n      }\n    ],\n
+        \   \"containers\": [\n      {\n        \"name\": \"nginx\",\n        \"image\":
+        \"nginx\",\n        \"imagePullPolicy\": \"IfNotPresent\",\n        \"livenessProbe\":
+        {\n          \"enable\": true,\n          \"type\": \"tcp\",\n          \"tcpSocket\":
+        {\n            \"host\": \"\",\n            \"port\": 80\n          },\n          \"initialDelaySeconds\":
+        10,\n          \"periodSeconds\": 5,\n          \"timeoutSeconds\": 10,\n
+        \         \"successThreshold\": 1,\n          \"failureThreshold\": 10\n        },\n
+        \       \"envs\": [\n          {\n            \"name\": \"foo\",\n            \"value\":
+        \"bar\"\n          }\n        ],\n        \"volumeMounts\": [\n          {\n
+        \           \"mountName\": \"www\",\n            \"mountPath\": \"/usr/share/nginx/html\",\n
+        \           \"readOnly\": false\n          }\n        ]\n      },\n      {\n
+        \       \"name\": \"busybox\",\n        \"image\": \"busybox\",\n        \"imagePullPolicy\":
+        \"IfNotPresent\",\n        \"tty\": true\n      }\n    ]\n  }\n}\n```"
+      parameters:
+      - description: the configs of the statefulSet
+        in: body
+        name: statefulSet
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create/update statefulSet
+      tags:
+      - workload
+  /workload/statefulset/detail:
+    get:
+      consumes:
+      - application/json
+      description: get statefulset detail
+      parameters:
+      - description: Retrieve the statefulset detail based on the namespace
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: Retrieve the statefulset detail based on the name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get statefulset detail
+      tags:
+      - workload
 swagger: "2.0"

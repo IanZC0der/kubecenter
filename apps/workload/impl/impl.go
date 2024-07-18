@@ -40,16 +40,20 @@ func (w *WorkloadServiceImpl) GetStatefulSetDetail(ctx context.Context, namespac
 	if err != nil {
 		return nil, err
 	}
-	pvcList := make([]*persistentvolume.PersistentVolumeClaim, len(statefulsetK8S.Spec.VolumeClaimTemplates))
+	pvcList := make([]*persistentvolume.PersistentVolumeClaim, 0)
 
 	// get pvc
-	for i, item := range statefulsetK8S.Spec.VolumeClaimTemplates {
-		pvcList[i] = &persistentvolume.PersistentVolumeClaim{
+	for _, item := range statefulsetK8S.Spec.VolumeClaimTemplates {
+		scName := ""
+		if item.Spec.StorageClassName != nil {
+			scName = *item.Spec.StorageClassName
+		}
+		pvcList = append(pvcList, &persistentvolume.PersistentVolumeClaim{
 			Name:             item.Name,
 			AccessModes:      item.Spec.AccessModes,
 			Capacity:         int32(item.Spec.Resources.Requests.Storage().Value() / (1024 * 1024)),
-			StorageClassName: *item.Spec.StorageClassName,
-		}
+			StorageClassName: scName,
+		})
 	}
 
 	podInStatefulset := pods.GetPodInfoFromPod(&corev1.Pod{
