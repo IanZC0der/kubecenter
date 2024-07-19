@@ -1530,6 +1530,202 @@
                         }
                     }
                 }
+<<<<<<< HEAD
+=======
+            }
+        },
+        "/workload/statefulset": {
+            "get": {
+                "description": "get statefulSet list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workload"
+                ],
+                "summary": "get statefulSet list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the statefulSet list based on the namespace, not required",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the statefulSet list based on the keyword, not required",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create/update a statefulSet. the configs of the statefulSet should be specified \nin the request body. use the createService api to create a service first.\n\nan example:\n```json\n\n{\n    \"name\": \"nginx-statefulset\",\n    \"namespace\": \"test\",\n    \"labels\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"nginx-statefulset\"\n      }\n    ],\n    \"selector\": [\n      {\n        \"key\": \"app\",\n        \"value\": \"nginx-statefulset-tp\"\n      }\n    ],\n    \"replicas\": 2,\n    \"volumeClaimTemplates\": [\n      {\n        \"name\": \"www\",\n        \"labels\": [\n          {\n            \"key\": \"pvc\",\n            \"value\": \"pvc01\"\n          }\n        ],\n        \"accessModes\": [\n          \"ReadWriteOnce\"\n        ],\n        \"capacity\": 100,\n        \"storageClassName\": \"nfs-client\"\n      }\n    ],\n  \"template\": {\n    \"netWorking\": {\n      \"hostNetwork\": true,\n      \"hostName\": \"test\",\n      \"dnsPolicy\": \"Default\",\n      \"dnsConfig\": {\n        \"nameservers\": [\n          \"8.8.8.8\"\n        ]\n      },\n      \"hostAliases\": [\n        {\n          \"key\": \"64.23.172.139\",\n          \"value\": \"foo.bar,foo2.bar\"\n        }\n      ]\n    },\n    \"base\": {\n      \"labels\": [\n        {\n          \"key\": \"app\",\n          \"value\": \"nginx-statefulset-tp\"\n        }\n      ],\n      \"restartPolicy\": \"Always\"\n    },\n    \"initContainers\": [\n      {\n        \"name\": \"busybox-init\",\n        \"image\": \"busybox\",\n        \"imagePullPolicy\": \"IfNotPresent\",\n        \"command\": [\n          \"echo\"\n        ],\n        \"args\": [\n          \"hello world\"\n        ]\n      }\n    ],\n    \"containers\": [\n      {\n        \"name\": \"nginx\",\n        \"image\": \"nginx\",\n        \"imagePullPolicy\": \"IfNotPresent\",\n        \"livenessProbe\": {\n          \"enable\": true,\n          \"type\": \"tcp\",\n          \"tcpSocket\": {\n            \"host\": \"\",\n            \"port\": 80\n          },\n          \"initialDelaySeconds\": 10,\n          \"periodSeconds\": 5,\n          \"timeoutSeconds\": 10,\n          \"successThreshold\": 1,\n          \"failureThreshold\": 10\n        },\n        \"envs\": [\n          {\n            \"name\": \"foo\",\n            \"value\": \"bar\"\n          }\n        ],\n        \"volumeMounts\": [\n          {\n            \"mountName\": \"www\",\n            \"mountPath\": \"/usr/share/nginx/html\",\n            \"readOnly\": false\n          }\n        ]\n      },\n      {\n        \"name\": \"busybox\",\n        \"image\": \"busybox\",\n        \"imagePullPolicy\": \"IfNotPresent\",\n        \"tty\": true\n      }\n    ]\n  }\n}\n```",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workload"
+                ],
+                "summary": "create/update statefulSet",
+                "parameters": [
+                    {
+                        "description": "the configs of the statefulSet",
+                        "name": "statefulSet",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete a statefulSet",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workload"
+                ],
+                "summary": "delete a statefulSet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of the statefulSet to be deleted",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of the statefulSet to be deleted",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/workload/statefulset/detail": {
+            "get": {
+                "description": "get statefulset detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workload"
+                ],
+                "summary": "get statefulset detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the statefulset detail based on the namespace",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the statefulset detail based on the name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+>>>>>>> main
             }
         }
     },
