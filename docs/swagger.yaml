@@ -1132,6 +1132,270 @@ paths:
       summary: create storage class
       tags:
       - persistent volume
+  /rbac/role:
+    delete:
+      consumes:
+      - application/json
+      description: delete a role
+      parameters:
+      - description: the namespace of the role to be deleted
+        in: query
+        name: namespace
+        type: string
+      - description: the name of the role to be deleted
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete a role
+      tags:
+      - rbac
+    get:
+      consumes:
+      - application/json
+      description: get role list
+      parameters:
+      - description: Retrieve the role list based on the namespace, not required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the role list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get role list
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      description: |-
+        create a role. the configurations of the role should be specified in the request
+        body. if the namespace is empty, a cluster role will be created
+
+        an example of request body:
+
+        ```json
+        {
+          "name": "test",
+          "namespace": "test",
+          "labels": [
+            {
+              "key": "role",
+              "value": "test"
+            }
+          ],
+          "rules": [
+            {
+              "apiGroups": [""],
+              "verbs": ["get","list"],
+              "resources": ["pods"],
+              "resourceNames": ["web"],
+              "nonResourceURLs": []
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: the configs of the role
+        in: body
+        name: ServiceAccount
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create role
+      tags:
+      - rbac
+  /rbac/role/detail:
+    get:
+      consumes:
+      - application/json
+      description: get role detail
+      parameters:
+      - description: Retrieve the role detail based on the namespace
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the role detail based on the name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get role detail
+      tags:
+      - rbac
+  /rbac/serviceaccount:
+    delete:
+      consumes:
+      - application/json
+      description: delete a service account
+      parameters:
+      - description: the namespace of the service account to be deleted
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of the service account to be deleted
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete a service account
+      tags:
+      - rbac
+    get:
+      consumes:
+      - application/json
+      description: get service account list
+      parameters:
+      - description: Retrieve the service account list based on the namespace, not
+          required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the service account list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get service account list
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      description: |-
+        create a service account. the configurations of the secret should be specified in the request
+        body.
+
+        an example of request body:
+
+        ```json
+        {
+          "name": "test",
+          "namespace": "test",
+          "labels": [
+            {
+              "key": "sa",
+              "value": "test"
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: the configs of the service account
+        in: body
+        name: ServiceAccount
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create service account
+      tags:
+      - rbac
   /secrets:
     delete:
       consumes:
