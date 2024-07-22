@@ -51,3 +51,12 @@ func NewCreateServiceAccountRequest() *ServiceAccountRequest {
 		},
 	}
 }
+
+func NewRoleRequest() *RoleRequest {
+	return &RoleRequest{
+		RequestBase: &RequestBase{
+			Labels: make([]*util.ListItem, 0),
+		},
+		Rules: make([]rbacv1.PolicyRule, 0),
+	}
+}

@@ -7,7 +7,9 @@ import (
 	"github.com/IanZC0der/kubecenter/ioc"
 	"github.com/IanZC0der/kubecenter/util"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 func init() {
@@ -73,4 +75,124 @@ func (s *RBACServiceImpl) CreateServiceAccount(ctx context.Context, req *rbac.Se
 		},
 	}
 	return res, nil
+}
+func (s *RBACServiceImpl) GetRoleList(ctx context.Context, namespace, keyword string) ([]*rbac.RoleResponse, error) {
+	res := make([]*rbac.RoleResponse, 0)
+	if namespace != "" {
+		list, err := global.KubeConfigSet.RbacV1().Roles(namespace).List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		for _, item := range list.Items {
+			if !strings.Contains(item.Name, keyword) {
+				continue
+			}
+			res = append(res, &rbac.RoleResponse{
+				ResponseBase: &rbac.ResponseBase{
+					Name:      item.Name,
+					Namespace: item.Namespace,
+					Age:       item.CreationTimestamp.Unix(),
+				},
+			})
+		}
+	} else {
+		clusterRoleList, err := global.KubeConfigSet.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		for _, item := range clusterRoleList.Items {
+			if !strings.Contains(item.Name, keyword) {
+				continue
+			}
+			res = append(res, &rbac.RoleResponse{
+				ResponseBase: &rbac.ResponseBase{
+					Name:      item.Name,
+					Namespace: item.Namespace,
+					Age:       item.CreationTimestamp.Unix(),
+				},
+			})
+		}
+
+	}
+	return res, nil
+}
+func (s *RBACServiceImpl) GetRoleDetail(ctx context.Context, namespace, name string) (*rbac.RoleRequest, error) {
+	res := rbac.NewRoleRequest()
+
+	if namespace != "" {
+		role, err := global.KubeConfigSet.RbacV1().Roles(namespace).Get(ctx, name, metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+
+		res.Name = role.Name
+		res.Namespace = role.Namespace
+		res.Labels = util.ListConverter(role.Labels)
+		res.Rules = role.Rules
+
+	} else {
+		role, err := global.KubeConfigSet.RbacV1().ClusterRoles().Get(ctx, name, metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+		res.Name = role.Name
+		res.Namespace = role.Namespace
+		res.Labels = util.ListConverter(role.Labels)
+		res.Rules = role.Rules
+	}
+	return res, nil
+}
+func (s *RBACServiceImpl) CreateRole(ctx context.Context, req *rbac.RoleRequest) (*rbac.RoleResponse, error) {
+	// if namespace is not empty, create role in namespace, else in the cluster
+	res := &rbac.RoleResponse{
+		ResponseBase: &rbac.ResponseBase{},
+	}
+	if req.Namespace != "" {
+		nsRole := &rbacv1.Role{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      req.Name,
+				Namespace: req.Namespace,
+				Labels:    util.MapConverter(req.Labels),
+			},
+			Rules: req.Rules,
+		}
+		created, err := global.KubeConfigSet.RbacV1().Roles(nsRole.Namespace).Create(ctx, nsRole, metav1.CreateOptions{})
+		if err != nil {
+			return nil, err
+		}
+		res.Name = created.Name
+		res.Namespace = created.Namespace
+		res.Age = created.CreationTimestamp.Unix()
+	} else {
+		clusterRole := &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      req.Name,
+				Namespace: req.Namespace,
+				Labels:    util.MapConverter(req.Labels),
+			},
+			Rules: req.Rules,
+		}
+		created, err := global.KubeConfigSet.RbacV1().ClusterRoles().Create(ctx, clusterRole, metav1.CreateOptions{})
+		if err != nil {
+			return nil, err
+		}
+		res.Name = created.Name
+		res.Namespace = created.Namespace
+		res.Age = created.CreationTimestamp.Unix()
+	}
+	return res, nil
+}
+func (s *RBACServiceImpl) DeleteRole(ctx context.Context, namespace, name string) error {
+	if namespace != "" {
+		err := global.KubeConfigSet.RbacV1().Roles(namespace).Delete(ctx, name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	} else {
+		err := global.KubeConfigSet.RbacV1().ClusterRoles().Delete(ctx, name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
