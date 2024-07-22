@@ -36,6 +36,11 @@ func (r *RBACApiHandler) Registry(router gin.IRouter) {
 	v1.GET("/role/detail", r.GetRoleDetail)
 	v1.POST("/role", r.CreateRole)
 	v1.DELETE("/role", r.DeleteRole)
+
+	v1.GET("/rolebinding", r.GetRoleBindingList)
+	v1.GET("/rolebinding/detail", r.GetRoleBindingDetail)
+	v1.POST("/rolebinding", r.CreateRoleBinding)
+	v1.DELETE("/rolebinding", r.DeleteRoleBinding)
 }
 
 // @Summary      get service account list
@@ -178,7 +183,7 @@ func (r *RBACApiHandler) DeleteRole(c *gin.Context) {
 // @Tags         rbac
 // @Accept       json
 // @Produce      json
-// @Param ServiceAccount body object true "the configs of the role"
+// @Param Role body object true "the configs of the role"
 // @Success      200  {object}  response.Response
 // @Failure      400  {object}  response.Response
 // @Failure      500  {object}  response.Response
@@ -195,4 +200,94 @@ func (r *RBACApiHandler) CreateRole(c *gin.Context) {
 		return
 	}
 	response.Success(c, "create role success", result)
+}
+
+// @Summary      delete a rolebinding
+// @Description	 delete a rolebinding
+// @Tags         rbac
+// @Accept       json
+// @Produce      json
+// @Param namespace query string false "the namespace of the rolebinding to be deleted"
+// @Param name query string true "the name of the rolebinding to be deleted"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /rbac/rolebinding [delete]
+func (r *RBACApiHandler) DeleteRoleBinding(c *gin.Context) {
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+	err := r.svc.DeleteRoleBinding(c.Request.Context(), namespace, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "delete role binding success", name)
+}
+
+// @Summary      get rolebinding list
+// @Description	 get rolebinding list
+// @Tags         rbac
+// @Accept       json
+// @Produce      json
+// @Param namespace query string false "Retrieve the rolebinding list based on the namespace, not required"
+// @Param keyword query string false "Retrieve the rolebinding list based on the keyword, not required"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /rbac/rolebinding [get]
+func (r *RBACApiHandler) GetRoleBindingList(c *gin.Context) {
+	namespace := c.Query("namespace")
+	keyword := c.Query("keyword")
+	res, err := r.svc.GetRoleBindingList(c.Request.Context(), namespace, keyword)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get role binding list success", res)
+}
+
+// @Summary      get rolebinding detail
+// @Description	 get rolebinding detail
+// @Tags         rbac
+// @Accept       json
+// @Produce      json
+// @Param namespace query string false "Retrieve the rolebinding detail based on the namespace"
+// @Param name query string true "Retrieve the rolebinding detail based on the name"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /rbac/rolebinding/detail [get]
+func (r *RBACApiHandler) GetRoleBindingDetail(c *gin.Context) {
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+	res, err := r.svc.GetRoleBindingDetail(c.Request.Context(), namespace, name)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "get role binding detail success", res)
+}
+
+// @Summary      create rolebinding
+// @Description.markdown createrolebinding
+// @Tags         rbac
+// @Accept       json
+// @Produce      json
+// @Param RoleBinding body object true "the configs of the rolebinding"
+// @Success      200  {object}  response.Response
+// @Failure      400  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /rbac/rolebinding [post]
+func (r *RBACApiHandler) CreateRoleBinding(c *gin.Context) {
+	req := rbac.NewRoleBindingRequest()
+	if err := c.ShouldBind(req); err != nil {
+		response.Failed(c, err)
+		return
+	}
+	result, err := r.svc.CreateRoleBinding(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c, err)
+		return
+	}
+	response.Success(c, "create role binding success", result)
 }
