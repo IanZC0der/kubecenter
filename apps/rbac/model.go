@@ -43,3 +43,11 @@ type CreateRoleBindingRequest struct {
 type RoleBindingResponse struct {
 	*ResponseBase
 }
+
+func NewCreateServiceAccountRequest() *ServiceAccountRequest {
+	return &ServiceAccountRequest{
+		RequestBase: &RequestBase{
+			Labels: make([]*util.ListItem, 0),
+		},
+	}
+}
