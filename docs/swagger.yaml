@@ -1229,7 +1229,7 @@ paths:
       parameters:
       - description: the configs of the role
         in: body
-        name: ServiceAccount
+        name: Role
         required: true
         schema:
           type: object
@@ -1282,6 +1282,157 @@ paths:
           schema:
             $ref: '#/definitions/response.Response'
       summary: get role detail
+      tags:
+      - rbac
+  /rbac/rolebinding:
+    delete:
+      consumes:
+      - application/json
+      description: delete a rolebinding
+      parameters:
+      - description: the namespace of the rolebinding to be deleted
+        in: query
+        name: namespace
+        type: string
+      - description: the name of the rolebinding to be deleted
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: delete a rolebinding
+      tags:
+      - rbac
+    get:
+      consumes:
+      - application/json
+      description: get rolebinding list
+      parameters:
+      - description: Retrieve the rolebinding list based on the namespace, not required
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the rolebinding list based on the keyword, not required
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get rolebinding list
+      tags:
+      - rbac
+    post:
+      consumes:
+      - application/json
+      description: |-
+        create a rolebinding. the configurations of the rolebinding should be specified in the request
+        body. if the namespace is empty, a cluster rolebinding will be created. service account and the role specified in
+        the request body should be created before creating the role binding
+
+        an example of request body:
+
+        ```json
+        {
+          "name": "test-rb",
+          "namespace": "test",
+          "labels": [
+            {
+              "key": "name",
+              "value": "rb"
+            }
+          ],
+          "roleRef": "test",
+          "subjects": [
+            {
+              "name": "test",
+              "namespace": "test"
+            }
+          ]
+        }
+        ```
+      parameters:
+      - description: the configs of the rolebinding
+        in: body
+        name: RoleBinding
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: create rolebinding
+      tags:
+      - rbac
+  /rbac/rolebinding/detail:
+    get:
+      consumes:
+      - application/json
+      description: get rolebinding detail
+      parameters:
+      - description: Retrieve the rolebinding detail based on the namespace
+        in: query
+        name: namespace
+        type: string
+      - description: Retrieve the rolebinding detail based on the name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: get rolebinding detail
       tags:
       - rbac
   /rbac/serviceaccount:

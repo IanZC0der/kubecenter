@@ -306,7 +306,7 @@ func (s *RBACServiceImpl) CreateRoleBinding(ctx context.Context, req *rbac.RoleB
 				return shouldReturn
 			}(req.Subjects),
 			RoleRef: rbacv1.RoleRef{
-				Name:     req.Name,
+				Name:     req.RoleRef,
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "Role",
 			},
@@ -351,7 +351,7 @@ func (s *RBACServiceImpl) CreateRoleBinding(ctx context.Context, req *rbac.RoleB
 				return shouldReturn
 			}(req.Subjects),
 			RoleRef: rbacv1.RoleRef{
-				Name:     req.Name,
+				Name:     req.RoleRef,
 				APIGroup: "rbac.authorization.k8s.io",
 				Kind:     "ClusterRole",
 			},

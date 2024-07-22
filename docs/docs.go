@@ -1409,7 +1409,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "the configs of the role",
-                        "name": "ServiceAccount",
+                        "name": "Role",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -1510,6 +1510,197 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Retrieve the role detail based on the name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rbac/rolebinding": {
+            "get": {
+                "description": "get rolebinding list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "get rolebinding list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the rolebinding list based on the namespace, not required",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the rolebinding list based on the keyword, not required",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create a rolebinding. the configurations of the rolebinding should be specified in the request\nbody. if the namespace is empty, a cluster rolebinding will be created. service account and the role specified in\nthe request body should be created before creating the role binding\n\nan example of request body:\n\n` + "`" + `` + "`" + `` + "`" + `json\n{\n  \"name\": \"test-rb\",\n  \"namespace\": \"test\",\n  \"labels\": [\n    {\n      \"key\": \"name\",\n      \"value\": \"rb\"\n    }\n  ],\n  \"roleRef\": \"test\",\n  \"subjects\": [\n    {\n      \"name\": \"test\",\n      \"namespace\": \"test\"\n    }\n  ]\n}\n` + "`" + `` + "`" + `` + "`" + `",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "create rolebinding",
+                "parameters": [
+                    {
+                        "description": "the configs of the rolebinding",
+                        "name": "RoleBinding",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete a rolebinding",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "delete a rolebinding",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of the rolebinding to be deleted",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of the rolebinding to be deleted",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rbac/rolebinding/detail": {
+            "get": {
+                "description": "get rolebinding detail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rbac"
+                ],
+                "summary": "get rolebinding detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Retrieve the rolebinding detail based on the namespace",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Retrieve the rolebinding detail based on the name",
                         "name": "name",
                         "in": "query",
                         "required": true
