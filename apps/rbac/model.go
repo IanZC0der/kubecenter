@@ -34,7 +34,7 @@ type RoleResponse struct {
 	*ResponseBase
 }
 
-type CreateRoleBindingRequest struct {
+type RoleBindingRequest struct {
 	*RequestBase
 	Subjects []*ServiceAccountRequest `json:"subjects"`
 	RoleRef  string                   `json:"roleRef"`
@@ -42,6 +42,15 @@ type CreateRoleBindingRequest struct {
 
 type RoleBindingResponse struct {
 	*ResponseBase
+}
+
+func NewRoleBindingRequest() *RoleBindingRequest {
+	return &RoleBindingRequest{
+		RequestBase: &RequestBase{
+			Labels: make([]*util.ListItem, 0),
+		},
+		Subjects: make([]*ServiceAccountRequest, 0),
+	}
 }
 
 func NewCreateServiceAccountRequest() *ServiceAccountRequest {

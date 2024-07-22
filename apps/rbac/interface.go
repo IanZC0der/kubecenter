@@ -14,4 +14,8 @@ type Service interface {
 	GetRoleDetail(ctx context.Context, namespace, name string) (*RoleRequest, error)
 	CreateRole(ctx context.Context, req *RoleRequest) (*RoleResponse, error)
 	DeleteRole(ctx context.Context, namespace, name string) error
+	GetRoleBindingList(ctx context.Context, namespace, keyword string) ([]*RoleBindingResponse, error)
+	GetRoleBindingDetail(ctx context.Context, namespace, name string) (*RoleBindingRequest, error)
+	CreateRoleBinding(ctx context.Context, req *RoleBindingRequest) (*RoleBindingRequest, error)
+	DeleteRoleBinding(ctx context.Context, namespace, name string) error
 }
