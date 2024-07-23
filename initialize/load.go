@@ -17,5 +17,6 @@ func LoadConfigFromEnv() error {
 	httpPortNumber, _ := strconv.Atoi(os.Getenv("HTTP_PORT"))
 	global.CONF.App.HttpPort = int64(httpPortNumber)
 	global.CONF.System.Provisioner = os.Getenv("PROVISIONER")
+	global.CONF.System.MetricsServerUrl = os.Getenv("METRICS_SERVER_URL")
 	return nil
 }

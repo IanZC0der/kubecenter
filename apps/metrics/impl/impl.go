@@ -2,6 +2,8 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/IanZC0der/kubecenter/apps/metrics"
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
@@ -238,5 +240,64 @@ func (m *MetricsServiceImpl) GetResourceInfo(ctx context.Context) []*metrics.Met
 	for _, item := range result {
 		item.Color = util.GenerateRGB(item.Value)
 	}
+	return result
+}
+
+func (m *MetricsServiceImpl) GetClusterUsageInfo(ctx context.Context) []*metrics.MetricsItem {
+	result := make([]*metrics.MetricsItem, 0)
+	//url := "/apis/metrics.k8s.io/v1beta1/nodes"
+	raw, err := global.KubeConfigSet.RESTClient().Get().AbsPath(global.CONF.System.MetricsServerUrl).DoRaw(ctx)
+	if err != nil {
+		return result
+	}
+	nodeMetricsList := metrics.NewNodeMetricsList()
+
+	err = json.Unmarshal(raw, &nodeMetricsList)
+	if err != nil {
+		return result
+	}
+
+	nodeList, err := global.KubeConfigSet.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return result
+	}
+	if len(nodeList.Items) != len(nodeMetricsList.Items) {
+		return result
+	}
+	var cpuUsage, cpuTotal, memUsage, memTotal int64
+
+	podsList, err := global.KubeConfigSet.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return result
+	}
+	var podUsage, podsTotal int64 = int64(len(podsList.Items)), 0
+
+	for i, item := range nodeList.Items {
+		cpuUsage += nodeMetricsList.Items[i].Usage.Cpu().MilliValue() // cpu usaage value should be millivalue
+		memUsage += nodeMetricsList.Items[i].Usage.Memory().Value()
+		cpuTotal += item.Status.Capacity.Cpu().MilliValue()
+		memTotal += item.Status.Capacity.Memory().Value()
+		podsTotal += item.Status.Capacity.Pods().Value()
+	}
+
+	// get usage percentage
+
+	podUsagePercentage := fmt.Sprintf("%.2f", float64(podUsage)/float64(podsTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: podUsagePercentage,
+		Name:  "Pods Usage",
+	})
+
+	memUsagePercentage := fmt.Sprintf("%.2f", float64(memUsage)/float64(memTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: memUsagePercentage,
+		Name:  "Memory Usage",
+	})
+
+	cpuUsagePercentage := fmt.Sprintf("%.2f", float64(cpuUsage)/float64(cpuTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: cpuUsagePercentage,
+		Name:  "CPU Usage",
+	})
 	return result
 }

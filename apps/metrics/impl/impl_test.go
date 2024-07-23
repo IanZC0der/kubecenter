@@ -43,3 +43,9 @@ func TestMetricsServiceImpl_GetRecourcesInfo(t *testing.T) {
 	t.Log(res)
 	t.Log(len(res))
 }
+
+func TestMetricsServiceImpl_GetClusterUsageInfo(t *testing.T) {
+	res := metricsSvc.GetClusterUsageInfo(ctx)
+	t.Log(res)
+	t.Log(len(res))
+}

@@ -14,7 +14,8 @@ type App struct {
 }
 
 type System struct {
-	Provisioner string `json:"provisioner" yaml:"provisioner" env:"PROVISIONER"`
+	Provisioner      string `json:"provisioner" yaml:"provisioner" env:"PROVISIONER"`
+	MetricsServerUrl string `json:"metrics_server_url" yaml:"metrics_server_url" env:"METRICS_SERVER_URL"`
 }
 
 type Config struct {
