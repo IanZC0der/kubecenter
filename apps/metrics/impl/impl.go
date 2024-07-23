@@ -64,3 +64,179 @@ func (m *MetricsServiceImpl) GetClusterInfo(ctx context.Context) []*metrics.Metr
 	}
 	return result
 }
+
+func (m *MetricsServiceImpl) GetResourceInfo(ctx context.Context) []*metrics.MetricsItem {
+	result := make([]*metrics.MetricsItem, 0)
+
+	// get namespace info
+	ns, err := global.KubeConfigSet.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			// values should be the number of namespaces
+			Value: strconv.Itoa(len(ns.Items)),
+			Name:  "Namespaces",
+		})
+	}
+
+	// get pods info
+	podsList, err := global.KubeConfigSet.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(podsList.Items)),
+			Name:  "Pods",
+		})
+	}
+
+	// get configMap info
+
+	cmlist, err := global.KubeConfigSet.CoreV1().ConfigMaps("").List(ctx, metav1.ListOptions{})
+
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(cmlist.Items)),
+			Name:  "ConfigMaps",
+		})
+	}
+
+	// get sercret info
+
+	scList, err := global.KubeConfigSet.CoreV1().Secrets("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(scList.Items)),
+			Name:  "Secrets",
+		})
+	}
+
+	// get persisten volumes info
+
+	pvList, err := global.KubeConfigSet.CoreV1().PersistentVolumes().List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(pvList.Items)),
+			Name:  "PersistentVolumes",
+		})
+	}
+
+	pvcList, err := global.KubeConfigSet.CoreV1().PersistentVolumeClaims("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(pvcList.Items)),
+			Name:  "PersistentVolumeClaims",
+		})
+	}
+
+	// get services info
+	svcList, err := global.KubeConfigSet.CoreV1().Services("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(svcList.Items)),
+			Name:  "Services",
+		})
+	}
+
+	// get ingress
+
+	ingrs, err := global.KubeConfigSet.NetworkingV1().Ingresses("").List(ctx, metav1.ListOptions{})
+
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(ingrs.Items)),
+			Name:  "Ingresses",
+		})
+	}
+
+	// deployment info
+
+	dplmt, err := global.KubeConfigSet.AppsV1().Deployments("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(dplmt.Items)),
+			Name:  "Deployments",
+		})
+	}
+
+	// Daemonsets
+
+	dmsList, err := global.KubeConfigSet.AppsV1().DaemonSets("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(dmsList.Items)),
+			Name:  "DaemonSets",
+		})
+	}
+
+	// StatefulSets
+	stSets, err := global.KubeConfigSet.AppsV1().StatefulSets("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(stSets.Items)),
+			Name:  "StatefulSets",
+		})
+	}
+
+	// Jobs
+
+	jobsList, err := global.KubeConfigSet.BatchV1().Jobs("").List(ctx, metav1.ListOptions{})
+
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(jobsList.Items)),
+			Name:  "Jobs",
+		})
+	}
+
+	//cronJobs
+
+	cronJobsList, err := global.KubeConfigSet.BatchV1().CronJobs("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(cronJobsList.Items)),
+			Name:  "CronJobs",
+		})
+	}
+
+	//service accounts
+	svcActs, err := global.KubeConfigSet.CoreV1().ServiceAccounts("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(svcActs.Items)),
+			Name:  "ServiceAccounts",
+		})
+	}
+
+	// cluster roles
+	rls, err := global.KubeConfigSet.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(rls.Items)),
+			Name:  "ClusterRoles",
+		})
+	}
+
+	//role binding
+	rb, err := global.KubeConfigSet.RbacV1().RoleBindings("").List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(rb.Items)),
+			Name:  "RoleBindings",
+		})
+	}
+	// cluster role bindings
+
+	clsrb, err := global.KubeConfigSet.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{})
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Value: strconv.Itoa(len(clsrb.Items)),
+			Name:  "ClusterRoleBindings",
+		})
+	}
+
+	//get rgb
+
+	for _, item := range result {
+		item.Color = util.GenerateRGB(item.Value)
+	}
+	return result
+}

@@ -8,4 +8,5 @@ const (
 
 type Service interface {
 	GetClusterInfo(ctx context.Context) []*MetricsItem
+	GetResourceInfo(ctx context.Context) []*MetricsItem
 }
