@@ -11,11 +11,10 @@ import (
 	_ "github.com/IanZC0der/kubecenter/apps/persistentvolume/impl"
 	_ "github.com/IanZC0der/kubecenter/apps/pods/api"
 	_ "github.com/IanZC0der/kubecenter/apps/pods/impl"
+	_ "github.com/IanZC0der/kubecenter/apps/rbac/api"
+	_ "github.com/IanZC0der/kubecenter/apps/rbac/impl"
 	_ "github.com/IanZC0der/kubecenter/apps/secret/api"
 	_ "github.com/IanZC0der/kubecenter/apps/secret/impl"
-<<<<<<< HEAD
-=======
 	_ "github.com/IanZC0der/kubecenter/apps/workload/api"
 	_ "github.com/IanZC0der/kubecenter/apps/workload/impl"
->>>>>>> main
 )
