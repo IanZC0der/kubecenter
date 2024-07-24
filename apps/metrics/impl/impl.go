@@ -2,12 +2,19 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/IanZC0der/kubecenter/apps/metrics"
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
 	"github.com/IanZC0der/kubecenter/util"
+	promapi "github.com/prometheus/client_golang/api"
+	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
+	"time"
 )
 
 func init() {
@@ -239,4 +246,131 @@ func (m *MetricsServiceImpl) GetResourceInfo(ctx context.Context) []*metrics.Met
 		item.Color = util.GenerateRGB(item.Value)
 	}
 	return result
+}
+
+func (m *MetricsServiceImpl) GetClusterUsageInfo(ctx context.Context) []*metrics.MetricsItem {
+	result := make([]*metrics.MetricsItem, 0)
+	//url := "/apis/metrics.k8s.io/v1beta1/nodes"
+	raw, err := global.KubeConfigSet.RESTClient().Get().AbsPath(global.CONF.System.MetricsServerUrl).DoRaw(ctx)
+	if err != nil {
+		return result
+	}
+	nodeMetricsList := metrics.NewNodeMetricsList()
+
+	err = json.Unmarshal(raw, &nodeMetricsList)
+	if err != nil {
+		return result
+	}
+
+	nodeList, err := global.KubeConfigSet.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return result
+	}
+	if len(nodeList.Items) != len(nodeMetricsList.Items) {
+		return result
+	}
+	var cpuUsage, cpuTotal, memUsage, memTotal int64
+
+	podsList, err := global.KubeConfigSet.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return result
+	}
+	var podUsage, podsTotal int64 = int64(len(podsList.Items)), 0
+
+	for i, item := range nodeList.Items {
+		cpuUsage += nodeMetricsList.Items[i].Usage.Cpu().MilliValue() // cpu usaage value should be millivalue
+		memUsage += nodeMetricsList.Items[i].Usage.Memory().Value()
+		cpuTotal += item.Status.Capacity.Cpu().MilliValue()
+		memTotal += item.Status.Capacity.Memory().Value()
+		podsTotal += item.Status.Capacity.Pods().Value()
+	}
+
+	// get usage percentage
+
+	podUsagePercentage := fmt.Sprintf("%.2f", float64(podUsage)/float64(podsTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: podUsagePercentage,
+		Name:  "Pods Usage",
+	})
+
+	memUsagePercentage := fmt.Sprintf("%.2f", float64(memUsage)/float64(memTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: memUsagePercentage,
+		Label: util.CLUSTER_MEMORY,
+		Name:  "Memory Usage",
+	})
+
+	cpuUsagePercentage := fmt.Sprintf("%.2f", float64(cpuUsage)/float64(cpuTotal)*100)
+	result = append(result, &metrics.MetricsItem{
+		Value: cpuUsagePercentage,
+		Label: util.CLUSTER_CPU,
+		Name:  "CPU Usage",
+	})
+	return result
+}
+
+func (m *MetricsServiceImpl) GetClusterUsageTrends(ctx context.Context) []*metrics.MetricsItem {
+	result := make([]*metrics.MetricsItem, 0)
+	data, err := m.getMetricsFromPrometheus(util.CLUSTER_CPU)
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Name:  "Cluster CPU Usage",
+			Value: data,
+		})
+	}
+
+	data, err = m.getMetricsFromPrometheus(util.CLUSTER_MEMORY)
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Name:  "Cluster Memory Usage",
+			Value: data,
+		})
+	}
+
+	return result
+}
+
+func (m *MetricsServiceImpl) getMetricsFromPrometheus(metricsName string) (string, error) {
+	result := make(map[string][]string)
+	addr := fmt.Sprintf("%s://%s:%v", global.CONF.System.Prometheus.Pscheme, global.CONF.System.Prometheus.Phost, global.CONF.System.Prometheus.Pport)
+	client, err := promapi.NewClient(promapi.Config{
+		Address: addr,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	promConn := promv1.NewAPI(client)
+	end := time.Now()
+	start := end.Add(-time.Hour * 24)
+	r := promv1.Range{
+		Start: start,
+		End:   end,
+		Step:  5 * time.Minute,
+	}
+
+	queryRange, _, err := promConn.QueryRange(context.TODO(), metricsName, r)
+	if err != nil {
+		return "", err
+	}
+
+	matrix := queryRange.(model.Matrix)
+	if len(matrix) == 0 {
+		return "", errors.New("prometheus returns no data")
+	}
+	// x is timestamp, y is the value (usage)
+	x, y := make([]string, 0), make([]string, 0)
+
+	for _, value := range matrix[0].Values {
+		format := value.Timestamp.Time().Format("15:04")
+		x = append(x, format)
+		y = append(y, value.Value.String())
+
+	}
+	result["x"] = x
+	result["y"] = y
+
+	raw, _ := json.Marshal(result)
+
+	return string(raw), nil
 }

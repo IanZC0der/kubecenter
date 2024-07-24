@@ -14,9 +14,16 @@ type App struct {
 }
 
 type System struct {
-	Provisioner string `json:"provisioner" yaml:"provisioner" env:"PROVISIONER"`
+	Provisioner      string      `json:"provisioner" yaml:"provisioner" env:"PROVISIONER"`
+	MetricsServerUrl string      `json:"metrics_server_url" yaml:"metrics_server_url" env:"METRICS_SERVER_URL"`
+	Prometheus       *Prometheus `json:"prometheus" yaml:"prometheus" env:"PROMETHEUS"`
 }
 
+type Prometheus struct {
+	Phost   string `json:"phost" yaml:"phost" env:"PROMETHEUS_HOST"`
+	Pport   int64  `json:"pport" yaml:"pport" env:"PROMETHEUS_PORT"`
+	Pscheme string `json:"pscheme" yaml:"pscheme" env:"PROMETHEUS_SCHEME"`
+}
 type Config struct {
 	//MySQL *MySQL `json:"mysql"`
 
