@@ -17,8 +17,10 @@ func C() *conf.Config {
 
 func Init() *conf.Config {
 	c := &conf.Config{
-		App:    &conf.App{},
-		System: &conf.System{},
+		App: &conf.App{},
+		System: &conf.System{
+			Prometheus: &conf.Prometheus{},
+		},
 	}
 	return c
 }

@@ -3,13 +3,18 @@ package impl
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/IanZC0der/kubecenter/apps/metrics"
 	"github.com/IanZC0der/kubecenter/global"
 	"github.com/IanZC0der/kubecenter/ioc"
 	"github.com/IanZC0der/kubecenter/util"
+	promapi "github.com/prometheus/client_golang/api"
+	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strconv"
+	"time"
 )
 
 func init() {
@@ -291,13 +296,81 @@ func (m *MetricsServiceImpl) GetClusterUsageInfo(ctx context.Context) []*metrics
 	memUsagePercentage := fmt.Sprintf("%.2f", float64(memUsage)/float64(memTotal)*100)
 	result = append(result, &metrics.MetricsItem{
 		Value: memUsagePercentage,
+		Label: util.CLUSTER_MEMORY,
 		Name:  "Memory Usage",
 	})
 
 	cpuUsagePercentage := fmt.Sprintf("%.2f", float64(cpuUsage)/float64(cpuTotal)*100)
 	result = append(result, &metrics.MetricsItem{
 		Value: cpuUsagePercentage,
+		Label: util.CLUSTER_CPU,
 		Name:  "CPU Usage",
 	})
 	return result
+}
+
+func (m *MetricsServiceImpl) GetClusterUsageTrends(ctx context.Context) []*metrics.MetricsItem {
+	result := make([]*metrics.MetricsItem, 0)
+	data, err := m.getMetricsFromPrometheus(util.CLUSTER_CPU)
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Name:  "Cluster CPU Usage",
+			Value: data,
+		})
+	}
+
+	data, err = m.getMetricsFromPrometheus(util.CLUSTER_MEMORY)
+	if err == nil {
+		result = append(result, &metrics.MetricsItem{
+			Name:  "Cluster Memory Usage",
+			Value: data,
+		})
+	}
+
+	return result
+}
+
+func (m *MetricsServiceImpl) getMetricsFromPrometheus(metricsName string) (string, error) {
+	result := make(map[string][]string)
+	addr := fmt.Sprintf("%s://%s:%v", global.CONF.System.Prometheus.Pscheme, global.CONF.System.Prometheus.Phost, global.CONF.System.Prometheus.Pport)
+	client, err := promapi.NewClient(promapi.Config{
+		Address: addr,
+	})
+
+	if err != nil {
+		return "", err
+	}
+	promConn := promv1.NewAPI(client)
+	end := time.Now()
+	start := end.Add(-time.Hour * 24)
+	r := promv1.Range{
+		Start: start,
+		End:   end,
+		Step:  5 * time.Minute,
+	}
+
+	queryRange, _, err := promConn.QueryRange(context.TODO(), metricsName, r)
+	if err != nil {
+		return "", err
+	}
+
+	matrix := queryRange.(model.Matrix)
+	if len(matrix) == 0 {
+		return "", errors.New("prometheus returns no data")
+	}
+	// x is timestamp, y is the value (usage)
+	x, y := make([]string, 0), make([]string, 0)
+
+	for _, value := range matrix[0].Values {
+		format := value.Timestamp.Time().Format("15:04")
+		x = append(x, format)
+		y = append(y, value.Value.String())
+
+	}
+	result["x"] = x
+	result["y"] = y
+
+	raw, _ := json.Marshal(result)
+
+	return string(raw), nil
 }

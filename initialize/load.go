@@ -18,5 +18,9 @@ func LoadConfigFromEnv() error {
 	global.CONF.App.HttpPort = int64(httpPortNumber)
 	global.CONF.System.Provisioner = os.Getenv("PROVISIONER")
 	global.CONF.System.MetricsServerUrl = os.Getenv("METRICS_SERVER_URL")
+	global.CONF.System.Prometheus.Phost = os.Getenv("PROMETHEUS_HOST")
+	prometheusPortNumber, _ := strconv.Atoi(os.Getenv("PROMETHEUS_PORT"))
+	global.CONF.System.Prometheus.Pport = int64(prometheusPortNumber)
+	global.CONF.System.Prometheus.Pscheme = os.Getenv("PROMETHEUS_SCHEME")
 	return nil
 }
